@@ -35,11 +35,12 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 include_directories(include)
 
 # TODO(dsinghan): If refactor makes it necessary, update name and srcs
-# add_library(example_lib src/example_lib.cc)
+add_library(session src/session.cc)
+add_library(server src/server.cc)
 
 # TODO(dsinghan): If refactor makes it necessary, update deps
-add_executable(server src/server_main.cc)
-target_link_libraries(server Boost::system pthread)
+add_executable(server_main src/server_main.cc)
+target_link_libraries(server_main server session Boost::system pthread)
 
 # TODO(!): Update test executable name, srcs, and deps
 # add_executable(example_lib_test tests/example_lib_test.cc)
