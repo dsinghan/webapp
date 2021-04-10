@@ -37,10 +37,11 @@ include_directories(include)
 # TODO(dsinghan): If refactor makes it necessary, update name and srcs
 add_library(session src/session.cc)
 add_library(server src/server.cc)
+add_library(config_parser src/config_parser.cc)
 
 # TODO(dsinghan): If refactor makes it necessary, update deps
-add_executable(server_main src/server_main.cc)
-target_link_libraries(server_main server session Boost::system pthread)
+add_executable(webserver src/server_main.cc)
+target_link_libraries(webserver server session config_parser Boost::system pthread)
 
 # TODO(!): Update test executable name, srcs, and deps
 # add_executable(example_lib_test tests/example_lib_test.cc)

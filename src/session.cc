@@ -1,7 +1,5 @@
 #include "session.h"
 
-using boost::asio::ip::tcp;
-
 session::session(boost::asio::io_service& io_service)
 : socket_(io_service)
 {
@@ -25,8 +23,15 @@ void session::handle_read(const boost::system::error_code& error,
 {
     if (!error)
     {
+        boost::asio::streambuf response_buffer;
+        std::ostream response_stream(&response_buffer);
+        response_stream << "HTTP/1.1 200 OK\r\n";
+        response_stream << "Content-Type: text/plain\r\n";
+        response_stream << "Content-Length: " << bytes_transferred << "\r\n\r\n";
+        response_stream << std::string(data_, data_ + bytes_transferred);
+
         boost::asio::async_write(socket_,
-            boost::asio::buffer(data_, bytes_transferred),
+            response_buffer,
             boost::bind(&session::handle_write, this,
             boost::asio::placeholders::error));
     }

@@ -10,6 +10,7 @@
 
 #include "session.h"
 #include "server.h"
+#include "config_parser.h"
 
 using boost::asio::ip::tcp;
 
@@ -26,7 +27,13 @@ int main(int argc, char* argv[])
     boost::asio::io_service io_service;
 
     using namespace std; // For atoi.
-    server s(io_service, atoi(argv[1]));
+
+    NginxConfigParser config_parser;
+    NginxConfig config;
+    int port;
+    port = config_parser.extract_port(argv[1], &config);
+
+    server s(io_service, port);
 
     io_service.run();
   }
