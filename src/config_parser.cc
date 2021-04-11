@@ -14,6 +14,7 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <string.h>
 
 #include "config_parser.h"
 
@@ -263,10 +264,20 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
   return return_value;
 }
 
-//Port must be set as the first statement within the first block
 int NginxConfigParser::extract_port(const char* file_name, NginxConfig* config) {
-    Parse(file_name, config);
-    std::string port;
-    port = config->statements_[0].get()->child_block_.get()->statements_[0].get()->tokens_[1].c_str();
-    return stoi(port);
+  Parse(file_name, config);
+  std::string port;
+  for (int i = 0; i < config->statements_.size(); i++) {
+  /* Looks for the config portion that is named server*/
+    if (!strcmp(config->statements_[i].get()->tokens_[0].c_str(),"server")) {
+      for (int j = 0; j < config->statements_[i].get()->child_block_.get()->statements_.size(); j++) {
+      /* Looks inside server for the parameter that is called listen */
+        if(!strcmp(config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[0].c_str(), "listen")) {
+        /* Extracts the port number that follows listen */
+          port = config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[1].c_str();
+        }   
+      }
+    }
+  }
+  return stoi(port);
 }

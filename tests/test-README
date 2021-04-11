@@ -1,0 +1,14 @@
+In order to run a test checking that the port number is parsed and used
+correctly, run the following commands from the powell-cat directory:
+
+mkdir build
+cd build
+cmake ..
+make
+./bin/webserver ../tests/test_config
+
+Then, in a new terminal window in the SAME docker environment, run:
+
+nc localhost 7023
+
+You should be able to send and receive messages from between you and the server.
