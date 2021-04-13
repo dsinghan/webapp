@@ -50,6 +50,12 @@ target_link_libraries(webserver server session config_parser Boost::system pthre
 # TODO(!): Update with test binary
 # gtest_discover_tests(example_lib_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
+# Integration Test
+add_test(
+    NAME integration_test
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration_test.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
 # TODO(!): Update with target/test targets
 # include(cmake/CodeCoverageReportConfig.cmake)
 # generate_coverage_report(TARGETS example_server example_lib TESTS example_lib_test)
