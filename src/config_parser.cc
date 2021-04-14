@@ -223,8 +223,10 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
           new_config);
       config_stack.push(new_config);
     } else if (token_type == TOKEN_TYPE_END_BLOCK) {
+      /* Fixed issue of encapsulated brackets and empty brackets returning FALSE. */
       if (last_token_type != TOKEN_TYPE_STATEMENT_END &&
-          last_token_type != TOKEN_TYPE_START_BLOCK) {
+          last_token_type != TOKEN_TYPE_START_BLOCK &&
+          last_token_type != TOKEN_TYPE_END_BLOCK) {
         // Error.
         break;
       }

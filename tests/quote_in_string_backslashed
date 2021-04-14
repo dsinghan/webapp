@@ -1,5 +1,5 @@
 foo "bar";
-bar """;
+bar "o\"k";
 server {
   listen   80;
   server_name foo.com;

@@ -11,11 +11,11 @@ TEST(NginxConfigParserTest, SimpleConfig) {
 }
 
 //Checks and ensures that even number of quotes in a file (e.g. can't have """)
-TEST(triple_double_quote, SimpleConfig) {
+TEST(quote_in_string_not_backslashed, SimpleConfig) {
   NginxConfigParser parser;
   NginxConfig out_config;
 
-  bool success = parser.Parse("triple_double_quote", &out_config);
+  bool success = parser.Parse("quote_in_string_not_backslashed", &out_config);
 
   EXPECT_FALSE(success);
 }
@@ -39,16 +39,6 @@ TEST(quote_followed_by_letter, SimpleConfig) {
   bool success = parser.Parse("quote_followed_by_letter", &out_config);
 
   EXPECT_FALSE(success);
-}
-
-//Checks for backslash_escape characters in string.
-TEST(backslash_escape_in_string, SimpleConfig) {
-  NginxConfigParser parser;
-  NginxConfig out_config;
-
-  bool success = parser.Parse("backslash_escape_in_string", &out_config);
-
-  EXPECT_TRUE(success);
 }
 
 //Found bug with nested brackets returning false. Fixed code in coding_parser.cc
