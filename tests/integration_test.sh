@@ -2,14 +2,20 @@
 
 # Variables
 TMP_DIR=$(mktemp -d -t TEST-XXXXXXXXXX)
+BUILD_DIR="$TMP_DIR/build"
+EXECUTABLE="$BUILD_DIR/bin/webserver"
 CONFIG_FILE="$TMP_DIR/config.txt"
 EXPECTED_FILE="$TMP_DIR/expected.txt"
 OUTPUT_FILE="$TMP_DIR/output.txt"
-EXECUTABLE="../build/bin/webserver"
 LOCAL_HOST="127.0.0.1"
 PORT="8080"
 
 # Setup
+
+# - Build
+mkdir "$BUILD_DIR"
+cmake -S .. -B "$BUILD_DIR" > /dev/null 2>&1
+make -C "$BUILD_DIR" > /dev/null 2>&1
 
 # - Config File
 cat > "$CONFIG_FILE" << EOF
@@ -29,7 +35,7 @@ sed -i -e 's/$/\r/' "$EXPECTED_FILE"  # newlines should be CRLF
 # - Server
 "$EXECUTABLE" "$CONFIG_FILE" &
 SERVER_PID=$!
-sleep 5  # A short delay to allow time for the server to start
+sleep 1  # A short delay to allow time for the server to start
 
 # Perform Test
 
