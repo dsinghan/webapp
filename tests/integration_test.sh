@@ -29,7 +29,7 @@ sed -i -e 's/$/\r/' "$EXPECTED_FILE"  # newlines should be CRLF
 # - Server
 "$EXECUTABLE" "$CONFIG_FILE" &
 SERVER_PID=$!
-sleep 1  # A short delay to allow time for the server to start
+sleep 5  # A short delay to allow time for the server to start
 
 # Perform Test
 
