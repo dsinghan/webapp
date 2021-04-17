@@ -17,11 +17,12 @@ public:
 
   void start();
 
-private:
-  void handle_read(const boost::system::error_code& error,
+  void async_read();
+// private:
+  int handle_read(const boost::system::error_code& error,
       size_t bytes_transferred);
 
-  void handle_write(const boost::system::error_code& error);
+  int handle_write(const boost::system::error_code& error);
 
   tcp::socket socket_;
   enum { max_length = 1024 };
