@@ -1,3 +1,5 @@
+# checks for nested brackets
+
 server {
     location / {
         root /data/www;

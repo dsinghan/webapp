@@ -1,9 +1,7 @@
 #include "gtest/gtest.h"
 #include "session.h"
-#include "gmock/gmock.h"
 
-using ::testing::_;
-
+//Test a good handle_read input
 TEST(TestReadGood, SessionTest) {
     boost::asio::io_service io_service;
     session * s = new session(io_service);
@@ -18,6 +16,8 @@ TEST(TestReadGood, SessionTest) {
 
 }
 
+
+//Test a good handle write input
 TEST(TestWriteGood, SessionTest) {
     boost::asio::io_service io_service;
     session * s = new session(io_service);
@@ -29,6 +29,7 @@ TEST(TestWriteGood, SessionTest) {
 
 }
 
+//Tests to make sure errors are handled properly in handle_read
 TEST(TestReadBad, SessionTest) {
     boost::asio::io_service io_service;
     session * s = new session(io_service);
@@ -44,6 +45,7 @@ TEST(TestReadBad, SessionTest) {
 
 }
 
+//Tests to make sure errors are handled properly in handle_write
 TEST(TestWriteBad, SessionTest) {
     boost::asio::io_service io_service;
     session * s = new session(io_service);
@@ -56,6 +58,7 @@ TEST(TestWriteBad, SessionTest) {
 
 }
 
+//Tests to make sure proper socket is returned in socket function
 TEST(TestSocket, SessionTest) {
     boost::asio::io_service io_service;
     session * s = new session(io_service);

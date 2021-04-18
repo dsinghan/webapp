@@ -15,17 +15,20 @@ void server::start_accept()
             boost::asio::placeholders::error));
 }
 
-void server::handle_accept(session* new_session,
+int server::handle_accept(session* new_session,
     const boost::system::error_code& error)
 {
     if (!error)
     {
         new_session->start();
+        start_accept();
+        return 0;
     }
     else
     {
         delete new_session;
+        start_accept();
+        return 1;
     }
 
-    start_accept();
 }

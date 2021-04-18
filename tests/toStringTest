@@ -1,7 +1,3 @@
-# Make sure this fails if letter immediately after double quotes;
-
-foo "bar"d;
-
 server {
   listen   80;
   server_name foo.com;

@@ -1,4 +1,4 @@
-foo "bar";
+foo 'b\'ar';
 bar "o\"k";
 server {
   listen   80;

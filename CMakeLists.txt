@@ -48,11 +48,15 @@ add_executable(config_parser_test tests/config_parser_test.cc)
 target_link_libraries(config_parser_test config_parser gtest_main)
 
 add_executable(session_test tests/session_test.cc)
-target_link_libraries(session_test session gtest_main gmock_main)
+target_link_libraries(session_test session gtest_main)
+
+add_executable(server_test tests/server_test.cc)
+target_link_libraries(server_test server session gtest_main gmock_main)
 
 # TODO(!): Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Integration Test
 add_test(
@@ -62,4 +66,4 @@ add_test(
 
 # TODO(!): Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS webserver session server config_parser TESTS config_parser_test session_test)
+generate_coverage_report(TARGETS webserver session server config_parser TESTS config_parser_test session_test server_test)
