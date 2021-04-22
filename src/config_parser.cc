@@ -16,6 +16,8 @@
 #include <vector>
 #include <string.h>
 
+#include <boost/log/trivial.hpp>
+
 #include "config_parser.h"
 
 std::string NginxConfig::ToString(int depth) {
@@ -246,9 +248,8 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
     last_token_type = token_type;
   }
 
-  printf ("Bad transition from %s to %s\n",
-          TokenTypeAsString(last_token_type),
-          TokenTypeAsString(token_type));
+  BOOST_LOG_TRIVIAL(error) << "Bad transition from " << TokenTypeAsString(last_token_type) << " to " << TokenTypeAsString(token_type);
+
   return false;
 }
 
@@ -256,7 +257,7 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
   std::ifstream config_file;
   config_file.open(file_name);
   if (!config_file.good()) {
-    printf ("Failed to open config file: %s\n", file_name);
+    BOOST_LOG_TRIVIAL(error) << "Failed to open config file: " << file_name;
     return false;
   }
 
@@ -267,7 +268,14 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
 }
 
 int NginxConfigParser::extract_port(const char* file_name, NginxConfig* config) {
-  Parse(file_name, config);
+  // Returns the port specified in the given config file, or -1 if the file is not parsable.
+
+  // Parse the config file, creating a tree of config data that can later be accessed.
+  bool parse_status = Parse(file_name, config);
+  if (!parse_status) {
+    return -1;
+  }
+
   std::string port;
   for (int i = 0; i < config->statements_.size(); i++) {
   /* Looks for the config portion that is named server*/
@@ -277,7 +285,7 @@ int NginxConfigParser::extract_port(const char* file_name, NginxConfig* config) 
         if(!strcmp(config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[0].c_str(), "listen")) {
         /* Extracts the port number that follows listen */
           port = config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[1].c_str();
-        }   
+        }
       }
     }
   }

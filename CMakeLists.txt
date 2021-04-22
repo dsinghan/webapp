@@ -29,7 +29,7 @@ add_subdirectory(/usr/src/googletest googletest)
 # Enable Boost
 # Use static libraries so binaries can be deployed without a full boost install
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.50 REQUIRED COMPONENTS system)
+find_package(Boost 1.50 REQUIRED COMPONENTS system log_setup log)
 message(STATUS "Boost version: ${Boost_VERSION}")
 
 include_directories(include)
@@ -41,17 +41,17 @@ add_library(config_parser src/config_parser.cc)
 
 # If refactor makes it necessary, update deps
 add_executable(webserver src/server_main.cc)
-target_link_libraries(webserver server session config_parser Boost::system pthread)
+target_link_libraries(webserver server session config_parser Boost::system Boost::log_setup Boost::log pthread)
 
 # TODO(!): Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)
-target_link_libraries(config_parser_test config_parser gtest_main)
+target_link_libraries(config_parser_test config_parser gtest_main Boost::log_setup Boost::log)
 
 add_executable(session_test tests/session_test.cc)
-target_link_libraries(session_test session gtest_main)
+target_link_libraries(session_test session gtest_main Boost::log_setup Boost::log)
 
 add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server session gtest_main gmock_main)
+target_link_libraries(server_test server session gtest_main gmock_main Boost::log_setup Boost::log)
 
 # TODO(!): Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
