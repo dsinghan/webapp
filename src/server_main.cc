@@ -81,7 +81,10 @@ int main(int argc, char* argv[])
     }
 
     BOOST_LOG_TRIVIAL(info) << "Starting server";
-    server s(io_service, port);
+
+    std::string dir = ".";
+
+    server s(io_service, port, dir);
 
     io_service.run();
   }

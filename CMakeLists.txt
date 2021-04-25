@@ -38,10 +38,14 @@ include_directories(include)
 add_library(session src/session.cc)
 add_library(server src/server.cc)
 add_library(config_parser src/config_parser.cc)
+add_library(reply src/reply.cc)
+add_library(request_handler src/request_handler.cc)
+add_library(request_parser src/request_parser.cc)
+add_library(mime_types src/mime_types.cc)
 
 # If refactor makes it necessary, update deps
 add_executable(webserver src/server_main.cc)
-target_link_libraries(webserver server session config_parser Boost::system Boost::log_setup Boost::log pthread)
+target_link_libraries(webserver server session config_parser reply request_handler request_parser mime_types Boost::system Boost::log_setup Boost::log pthread)
 
 # TODO(!): Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)
