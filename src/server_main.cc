@@ -74,15 +74,23 @@ int main(int argc, char* argv[])
     NginxConfigParser config_parser;
     NginxConfig config;
     int port;
+    std::string dir;
+
+    // Extract port
     port = config_parser.extract_port(argv[1], &config);
     if (port == -1) {
       BOOST_LOG_TRIVIAL(fatal) << "Could not extract port";
       return 1;
     }
 
-    BOOST_LOG_TRIVIAL(info) << "Starting server";
+    // Extract base directory
+    dir = config_parser.extract_root(argv[1], &config);
+    if (dir == "") {
+      BOOST_LOG_TRIVIAL(fatal) << "Could not extract root";
+      return 1;
+    }
 
-    std::string dir = ".";
+    BOOST_LOG_TRIVIAL(info) << "Starting server";
 
     server s(io_service, port, dir);
 

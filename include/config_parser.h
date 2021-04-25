@@ -32,7 +32,12 @@ class NginxConfigParser {
   // iff the input config file is valid.
   bool Parse(std::istream* config_file, NginxConfig* config);
   bool Parse(const char* file_name, NginxConfig* config);
+
+  //Extract port from config
   int extract_port(const char* file_name, NginxConfig* config);
+
+  //Extract base directory from config
+  std::string extract_root(const char* file_name, NginxConfig* config);
 
  private:
   enum TokenType {

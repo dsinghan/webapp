@@ -43,6 +43,26 @@ void request_handler::handle_request(const request& req, reply& rep)
     return;
   }
 
+  // Extract /static or /echo path
+  std::size_t second_slash_pos = request_path.find_first_of("/", 1);
+  std::string path;
+  if (second_slash_pos == std::string::npos) {
+    path = request_path;
+  }
+  else {
+    path = request_path.substr(0, second_slash_pos);
+  }
+
+  // If path begins with /echo, serve echo responses
+  // Otherwise, serve static files
+  if (path == "/echo") {
+    rep.content = "echo";
+    return;
+  }
+  else if (path == "/static") {
+    request_path = request_path.substr(second_slash_pos);
+  }
+
   // If path ends in slash (i.e. is a directory) then add "index.html".
   if (request_path[request_path.size() - 1] == '/')
   {

@@ -291,3 +291,28 @@ int NginxConfigParser::extract_port(const char* file_name, NginxConfig* config) 
   }
   return stoi(port);
 }
+
+std::string NginxConfigParser::extract_root(const char* file_name, NginxConfig* config) {
+  // Returns the port specified in the given config file, or -1 if the file is not parsable.
+
+  // Parse the config file, creating a tree of config data that can later be accessed.
+  bool parse_status = Parse(file_name, config);
+  if (!parse_status) {
+    return "";
+  }
+
+  std::string root;
+  for (int i = 0; i < config->statements_.size(); i++) {
+  /* Looks for the config portion that is named server*/
+    if (!strcmp(config->statements_[i].get()->tokens_[0].c_str(),"server")) {
+      for (int j = 0; j < config->statements_[i].get()->child_block_.get()->statements_.size(); j++) {
+      /* Looks inside server for the parameter that is called listen */
+        if(!strcmp(config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[0].c_str(), "root")) {
+        /* Extracts the port number that follows listen */
+          root = config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[1].c_str();
+        }
+      }
+    }
+  }
+  return root;
+}

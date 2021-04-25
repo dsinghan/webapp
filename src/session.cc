@@ -30,25 +30,35 @@ int session::handle_read(const boost::system::error_code& error,
 {
     if (!error)
     {
-        // boost::asio::streambuf response_buffer;
-        // std::ostream response_stream(&response_buffer);
-        // response_stream << "HTTP/1.1 200 OK\r\n";
-        // response_stream << "Content-Type: text/plain\r\n";
-        // response_stream << "Content-Length: " << bytes_transferred << "\r\n\r\n";
-        // response_stream << std::string(data_, data_ + bytes_transferred);
-
+        // Parse data into request object
         http::server::request_parser::result_type result;
         std::tie(result, std::ignore) = request_parser_.parse(
               request_, data_, data_ + bytes_transferred);
+
+        // If good HTTP request, produce appropriate reply
         if (result == http::server::request_parser::good)
           {
             request_handler_.handle_request(request_, reply_);
+            if (reply_.content == "echo") {
+                boost::asio::streambuf response_buffer;
+                std::ostream response_stream(&response_buffer);
+                response_stream << "HTTP/1.1 200 OK\r\n";
+                response_stream << "Content-Type: text/plain\r\n";
+                response_stream << "Content-Length: " << bytes_transferred << "\r\n\r\n";
+                response_stream << std::string(data_, data_ + bytes_transferred);
+                boost::asio::async_write(socket_,
+                    response_buffer,
+                    boost::bind(&session::handle_write, this,
+                    boost::asio::placeholders::error));
+                return 0;
+            }
             boost::asio::async_write(socket_, 
                 reply_.to_buffers(),
                 boost::bind(&session::handle_write, this,
                 boost::asio::placeholders::error));
-            return 0;
           }
+
+        // If bad HTTP request, produce "400 Bad Request" reply
         else if (result == http::server::request_parser::bad)
           {
             reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
@@ -56,22 +66,16 @@ int session::handle_read(const boost::system::error_code& error,
                 reply_.to_buffers(),
                 boost::bind(&session::handle_write, this,
                 boost::asio::placeholders::error));
-            return 0;
           }
+
+        // Default echo
         else
           {
             boost::asio::async_write(socket_,
                 boost::asio::buffer(data_, bytes_transferred),
                 boost::bind(&session::handle_write, this,
                 boost::asio::placeholders::error));
-            return 0;
           }
-
-        // boost::asio::async_write(socket_,
-        //     response_buffer,
-        //     boost::bind(&session::handle_write, this,
-        //     boost::asio::placeholders::error));
-        
         return 0;
         
     }
