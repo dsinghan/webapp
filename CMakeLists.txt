@@ -40,22 +40,25 @@ add_library(server src/server.cc)
 add_library(config_parser src/config_parser.cc)
 add_library(reply src/reply.cc)
 add_library(request_handler src/request_handler.cc)
+add_library(echo_request_handler src/echo_request_handler.cc)
+add_library(static_request_handler src/static_request_handler.cc)
 add_library(request_parser src/request_parser.cc)
 add_library(mime_types src/mime_types.cc)
 
 # If refactor makes it necessary, update deps
 add_executable(webserver src/server_main.cc)
-target_link_libraries(webserver server session config_parser reply request_handler request_parser mime_types Boost::system Boost::log_setup Boost::log pthread)
+target_link_libraries(webserver server session config_parser reply request_handler echo_request_handler static_request_handler request_parser mime_types Boost::system Boost::log_setup Boost::log pthread)
 
 # TODO(!): Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)
 target_link_libraries(config_parser_test config_parser gtest_main Boost::log_setup Boost::log)
 
 add_executable(session_test tests/session_test.cc)
-target_link_libraries(session_test session gtest_main Boost::log_setup Boost::log)
+# target_link_libraries(session_test reply request_handler echo_request_handler static_request_handler request_parser mime_types session gtest_main Boost::log_setup Boost::log)
+target_link_libraries(session_test session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main Boost::log_setup Boost::log)
 
 add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server session gtest_main gmock_main Boost::log_setup Boost::log)
+target_link_libraries(server_test reply request_handler echo_request_handler static_request_handler request_parser mime_types server session gtest_main gmock_main Boost::log_setup Boost::log)
 
 # TODO(!): Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)

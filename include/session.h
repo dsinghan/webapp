@@ -7,7 +7,8 @@
 #include <boost/asio.hpp>
 #include "reply.h"
 #include "request.h"
-#include "request_handler.h"
+#include "static_request_handler.h"
+#include "echo_request_handler.h"
 #include "request_parser.h"
 
 //using boost::asio::ip::tcp;
@@ -15,9 +16,11 @@
 class session
 {
 public:
-  session(boost::asio::io_service& io_service, http::server::request_handler& handler);
+  session(boost::asio::io_service& io_service, http::server::echo_request_handler& echo_request_handler, http::server::static_request_handler& static_request_handler);
 
   boost::asio::ip::tcp::socket& socket();
+
+  int determine_handler(http::server::request req);
 
   void start();
 
@@ -33,7 +36,8 @@ public:
   char data_[max_length];
 
   /// The handler used to process the incoming request.
-  http::server::request_handler& request_handler_;
+  http::server::static_request_handler& static_request_handler_;
+  http::server::echo_request_handler& echo_request_handler_;
 
   /// The incoming request.
   http::server::request request_;
