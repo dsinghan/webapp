@@ -1,4 +1,5 @@
 #include "echo_request_handler.h"
+#include <boost/log/trivial.hpp>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -46,6 +47,7 @@ void echo_request_handler::handle_request(const request& req, reply& rep)
   else {
     rep = reply::stock_reply(reply::not_found);
   }
+  BOOST_LOG_TRIVIAL(info) << "Prepared Echo Response";
   return;
 }
 

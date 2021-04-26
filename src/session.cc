@@ -81,6 +81,8 @@ int session::handle_read(const boost::system::error_code& error,
 {
     if (!error)
     {
+        BOOST_LOG_TRIVIAL(info) << "Received request from " << socket_.remote_endpoint().address();
+
         // Parse data into request object
         http::server::request_parser::result_type result;
         std::tie(result, std::ignore) = request_parser_.parse(
@@ -90,9 +92,9 @@ int session::handle_read(const boost::system::error_code& error,
         if (result == http::server::request_parser::good)
           {
             std::string path = determine_path(request_);
-            BOOST_LOG_TRIVIAL(info) << "Path: " << path;
+            BOOST_LOG_TRIVIAL(info) << "Got good request with path: " << path;
             if (path == "/echo") { // echo
-              BOOST_LOG_TRIVIAL(info) << "Echo request";
+              BOOST_LOG_TRIVIAL(info) << "Handling echo request";
 
               echo_request_handler_.handle_request(request_, reply_);
 
@@ -112,9 +114,10 @@ int session::handle_read(const boost::system::error_code& error,
             } else { // static
               std::string base_path;
               if ( locations_.find(path) != locations_.end() ) {
-                BOOST_LOG_TRIVIAL(info) << "Static request";
+                BOOST_LOG_TRIVIAL(info) << "Handling static request";
                 base_path = locations_[path];
               } else {
+                BOOST_LOG_TRIVIAL(info) << "Handling Bad Request";
                 base_path = "NONE";  // If can't find static, then will just return bad request response.
               }
 
@@ -130,6 +133,7 @@ int session::handle_read(const boost::system::error_code& error,
         // If bad HTTP request, produce "400 Bad Request" reply
         else if (result == http::server::request_parser::bad)
           {
+            BOOST_LOG_TRIVIAL(warning) << "Producing 400 Bad Request";
             reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
             boost::asio::async_write(socket_,
                 reply_.to_buffers(),
