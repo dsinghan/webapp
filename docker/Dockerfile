@@ -19,6 +19,7 @@ FROM ubuntu:latest as deploy
 # Copy server output binary to "."
 COPY --from=builder /usr/src/project/build/bin/webserver .
 COPY --from=builder /usr/src/project/conf/my_config .
+COPY --from=builder /usr/src/project/static .
 
 # Expose some port(s)
 EXPOSE 80

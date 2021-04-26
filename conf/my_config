@@ -1,3 +1,15 @@
 server {
-    listen 80;
+  listen 8080;
+
+  location /echo {
+    root /echo;
+  }
+
+  location /static1 {
+    root static/static1/;
+  }
+
+  location /static2 {
+    root static/static2/;
+  }
 }

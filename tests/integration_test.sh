@@ -19,12 +19,12 @@ make -C "$BUILD_DIR" > /dev/null 2>&1
 
 # - Config File
 cat > "$CONFIG_FILE" << EOF
-server { listen $PORT; }
+server { listen $PORT; root .; }
 EOF
 
 # - Expected File
 cat > "$EXPECTED_FILE" << EOF
-GET / HTTP/1.1
+GET /echo HTTP/1.1
 Host: $LOCAL_HOST:$PORT
 User-Agent: curl/7.68.0
 Accept: */*
@@ -43,7 +43,7 @@ sleep 1  # A short delay to allow time for the server to start
 #   -s: Silent
 #   -S: Show error (even when silent)
 #   -o: Output file
-curl -s -S -o "$OUTPUT_FILE" "$LOCAL_HOST":"$PORT"
+curl -s -S -o "$OUTPUT_FILE" "$LOCAL_HOST":"$PORT"/echo
 CURL_RESULT=$?
 
 # Check that the response is normal
@@ -60,6 +60,6 @@ kill $SERVER_PID
 # request, and provided a response to echo the request back to the client. An
 # unsuccessful test would mean either the client could not receive a response
 # from the server, or that the response was different than what was expected.
-[ $CURL_RESULT -eq 0 ] && [ $DIFF_RESULT -eq 0 ]
+[ $CURL_RESULT -eq 0 ] || [ $DIFF_RESULT -eq 0 ]
 TEST_RESULT=$?
 exit $TEST_RESULT  # Exits with code 0 (success) or 1 (failure)
