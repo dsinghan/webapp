@@ -1,12 +1,15 @@
-foo "bar";
-
 server {
-  server 50;
-  listen   8080;
-  server_name foo.com;
-  root .;
-}
+  listen 8080;
 
-hello {
-  port  80;
+  location /echo {
+    root /echo;
+  }
+
+  location /static1 {
+    root static112/;
+  }
+
+  location /static2 {
+    root static212/;
+  }
 }

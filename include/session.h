@@ -16,11 +16,16 @@
 class session
 {
 public:
-  session(boost::asio::io_service& io_service, http::server::echo_request_handler& echo_request_handler, http::server::static_request_handler& static_request_handler);
+  session(
+    boost::asio::io_service& io_service,
+    http::server::echo_request_handler& echo_request_handler,
+    http::server::static_request_handler& static_request_handler,
+    std::map<std::string, std::string> locations
+  );
 
   boost::asio::ip::tcp::socket& socket();
 
-  int determine_handler(http::server::request req);
+  std::string determine_path(http::server::request req);
 
   void start();
 
@@ -47,6 +52,8 @@ public:
 
   /// The reply to be sent back to the client.
   http::server::reply reply_;
+
+  std::map<std::string, std::string> locations_;
 };
 
 #endif

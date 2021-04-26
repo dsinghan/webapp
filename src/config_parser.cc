@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <string.h>
+#include <map>
 
 #include <boost/log/trivial.hpp>
 
@@ -315,4 +316,24 @@ std::string NginxConfigParser::extract_root(const char* file_name, NginxConfig* 
     }
   }
   return root;
+}
+
+std::map<std::string, std::string> NginxConfigParser::get_locations(NginxConfig * config) {
+  std::map<std::string, std::string> locations;
+
+  for (int i = 0; i < config->statements_.size(); i++) {
+  /* Looks for the config portion that is named server */
+    if (!strcmp(config->statements_[i].get()->tokens_[0].c_str(),"server")) {
+      for (int j = 0; j < config->statements_[i].get()->child_block_.get()->statements_.size(); j++) {
+      /* Looks inside server for the parameter that is called listen */
+        if(!strcmp(config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[0].c_str(), "location")) {
+          std::string key = config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[1];
+          std::string val = config->statements_[i].get()->child_block_.get()->statements_[j].get()->child_block_.get()->statements_[0]->tokens_[1];
+          locations[key] = val;
+        }
+      }
+    }
+  }
+
+  return locations;
 }

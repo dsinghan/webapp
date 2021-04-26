@@ -7,11 +7,11 @@
 
 using ::testing::_;
 
-class MockSession : public session {
-    public:
-    MockSession(boost::asio::io_service& io_service, http::server::echo_request_handler& echo_handler, http::server::static_request_handler& static_handler) : session(io_service, echo_handler, static_handler) {}
-    MOCK_METHOD0(start, void());
-};
+// class MockSession : public session {
+//     public:
+//     MockSession(boost::asio::io_service& io_service, http::server::echo_request_handler& echo_handler, http::server::static_request_handler& static_handler) : session(io_service, echo_handler, static_handler) {}
+//     MOCK_METHOD0(start, void());
+// };
 
 
 //Test basic functionality of server

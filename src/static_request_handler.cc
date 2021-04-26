@@ -1,3 +1,4 @@
+#include <boost/log/trivial.hpp>
 #include "static_request_handler.h"
 #include <fstream>
 #include <sstream>
@@ -10,12 +11,14 @@
 namespace http {
 namespace server {
 
-static_request_handler::static_request_handler(const std::string& doc_root)
-  : doc_root_(doc_root)
-{
-}
+// static_request_handler::static_request_handler(const std::string& doc_root)
+//   : doc_root_(doc_root)
+// {
+// }
 
-void static_request_handler::handle_request(const request& req, reply& rep)
+static_request_handler::static_request_handler() {}
+
+void static_request_handler::handle_request(const request& req, reply& rep, std::string base_path)
 {
   // Decode url to path.
   std::string request_path;
@@ -25,6 +28,8 @@ void static_request_handler::handle_request(const request& req, reply& rep)
     return;
   }
 
+  BOOST_LOG_TRIVIAL(info) << "RP: " << request_path;
+
   // Request path must be absolute and not contain "..".
   if (request_path.empty() || request_path[0] != '/'
       || request_path.find("..") != std::string::npos)
@@ -33,30 +38,41 @@ void static_request_handler::handle_request(const request& req, reply& rep)
     return;
   }
 
+  BOOST_LOG_TRIVIAL(info) << "After";
+
   // Extract /static or /echo path
   std::size_t second_slash_pos = request_path.find_first_of("/", 1);
   std::string path;
   if (second_slash_pos == std::string::npos) {
+    BOOST_LOG_TRIVIAL(info) << "A";
     path = request_path;
+    request_path = "";
   }
   else {
+    BOOST_LOG_TRIVIAL(info) << "B";
     path = request_path.substr(0, second_slash_pos);
+    request_path = request_path.substr(second_slash_pos);
   }
+
+  BOOST_LOG_TRIVIAL(info) << "Path: " << path;
 
   // If path begins with /echo, serve echo responses
   // Otherwise, serve static files
-  if (path != "/static") {
-    rep = reply::stock_reply(reply::bad_request);
-    return;
-  }
-  
-  request_path = request_path.substr(second_slash_pos);
+  // if (path != "/static") {
+  //   rep = reply::stock_reply(reply::bad_request);
+  //   return;
+  // }
+  BOOST_LOG_TRIVIAL(info) << "second slash pos " << second_slash_pos;
+
+  BOOST_LOG_TRIVIAL(info) << "GOT HERE";
 
   // If path ends in slash (i.e. is a directory) then add "index.html".
-  if (request_path[request_path.size() - 1] == '/')
+  if (request_path == "")
   {
     request_path += "index.html";
   }
+
+  BOOST_LOG_TRIVIAL(info) << "THEN";
 
   // Determine the file extension.
   std::size_t last_slash_pos = request_path.find_last_of("/");
@@ -68,7 +84,8 @@ void static_request_handler::handle_request(const request& req, reply& rep)
   }
 
   // Open the file to send back.
-  std::string full_path = doc_root_ + request_path;
+  std::string full_path = base_path + request_path;
+  BOOST_LOG_TRIVIAL(info) << "Static path: " << full_path;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is)
   {

@@ -83,16 +83,20 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    // Extract base directory
-    dir = config_parser.extract_root(argv[1], &config);
-    if (dir == "") {
-      BOOST_LOG_TRIVIAL(fatal) << "Could not extract root";
-      return 1;
-    }
+    // Extract locations mapping
+    std::map<std::string, std::string> locations = config_parser.get_locations(&config);
+
+    // for (auto const& x : locations)
+    // {
+    //     std::cout << x.first  // string (key)
+    //               << ':' 
+    //               << x.second // string's value
+    //               << std::endl;
+    // }
 
     BOOST_LOG_TRIVIAL(info) << "Starting server";
 
-    server s(io_service, port, dir);
+    server s(io_service, port, locations);
 
     io_service.run();
   }

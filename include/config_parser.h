@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 class NginxConfig;
 
@@ -38,6 +39,8 @@ class NginxConfigParser {
 
   //Extract base directory from config
   std::string extract_root(const char* file_name, NginxConfig* config);
+
+  std::map<std::string, std::string> get_locations(NginxConfig * config);
 
  private:
   enum TokenType {
