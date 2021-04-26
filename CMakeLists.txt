@@ -58,7 +58,7 @@ add_executable(session_test tests/session_test.cc)
 target_link_libraries(session_test session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main Boost::log_setup Boost::log)
 
 add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test reply request_handler echo_request_handler static_request_handler request_parser mime_types server session gtest_main gmock_main Boost::log_setup Boost::log)
+target_link_libraries(server_test server session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main gmock_main Boost::log_setup Boost::log)
 
 # TODO(!): Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
