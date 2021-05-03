@@ -28,9 +28,9 @@
 TEST(TestWriteGood, SessionTest) {
     boost::asio::io_service io_service;
     http::server::echo_request_handler* echo_handler_ = new http::server::echo_request_handler();
-    http::server::static_request_handler* static_handler_ = new http::server::static_request_handler();
-    std::map<std::string, std::string> locations;
-    session * s = new session(io_service, *echo_handler_, *static_handler_, locations);
+    http::server::static_request_handler* static_handler_ = new http::server::static_request_handler(" ");
+    std::map<std::string, http::server::request_handler*> locations;
+    session * s = new session(io_service, locations);
     boost::system::error_code error;
     
     int ret = s->handle_write(error);
@@ -43,9 +43,9 @@ TEST(TestWriteGood, SessionTest) {
 TEST(TestReadBad, SessionTest) {
     boost::asio::io_service io_service;
     http::server::echo_request_handler* echo_handler_ = new http::server::echo_request_handler();
-    http::server::static_request_handler* static_handler_ = new http::server::static_request_handler();
-    std::map<std::string, std::string> locations;
-    session * s = new session(io_service, *echo_handler_, *static_handler_, locations);
+    http::server::static_request_handler* static_handler_ = new http::server::static_request_handler(" ");
+    std::map<std::string, http::server::request_handler*> locations;
+    session * s = new session(io_service, locations);
     boost::system::error_code error;
     char text[] = "Hello World";
     strncpy(s->data_,text,strlen(text));
@@ -62,9 +62,9 @@ TEST(TestReadBad, SessionTest) {
 TEST(TestWriteBad, SessionTest) {
     boost::asio::io_service io_service;
     http::server::echo_request_handler* echo_handler_ = new http::server::echo_request_handler();
-    http::server::static_request_handler* static_handler_ = new http::server::static_request_handler();
-    std::map<std::string, std::string> locations;
-    session * s = new session(io_service, *echo_handler_, *static_handler_, locations);
+    http::server::static_request_handler* static_handler_ = new http::server::static_request_handler(" ");
+    std::map<std::string, http::server::request_handler*> locations;
+    session * s = new session(io_service, locations);
     boost::system::error_code error;
     error.assign(1, boost::system::system_category());
 
@@ -78,9 +78,9 @@ TEST(TestWriteBad, SessionTest) {
 TEST(TestSocket, SessionTest) {
     boost::asio::io_service io_service;
     http::server::echo_request_handler* echo_handler_ = new http::server::echo_request_handler();
-    http::server::static_request_handler* static_handler_ = new http::server::static_request_handler();
-    std::map<std::string, std::string> locations;
-    session * s = new session(io_service, *echo_handler_, *static_handler_, locations);
+    http::server::static_request_handler* static_handler_ = new http::server::static_request_handler(" ");
+    std::map<std::string, http::server::request_handler*> locations;
+    session * s = new session(io_service, locations);
     
     boost::asio::ip::tcp::socket * sock = &s->socket();
     int ret = (&s->socket_ == sock);

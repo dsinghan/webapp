@@ -18,8 +18,6 @@ class session
 public:
   session(
     boost::asio::io_service& io_service,
-    // http::server::echo_request_handler& echo_request_handler,
-    // http::server::static_request_handler& static_request_handler,
     std::map<std::string, http::server::request_handler*> locations
   );
 
@@ -39,10 +37,6 @@ public:
   boost::asio::ip::tcp::socket socket_;
   enum { max_length = 1024 };
   char data_[max_length];
-
-  /// The handler used to process the incoming request.
-  // http::server::static_request_handler& static_request_handler_;
-  // http::server::echo_request_handler& echo_request_handler_;
 
   /// The incoming request.
   http::server::request request_;

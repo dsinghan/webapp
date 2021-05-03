@@ -19,7 +19,12 @@ make -C "$BUILD_DIR" > /dev/null 2>&1
 
 # - Config File
 cat > "$CONFIG_FILE" << EOF
-server { listen $PORT; root .; }
+server { 
+    listen $PORT; 
+    location /echo {
+    root /echo;
+    }
+  }
 EOF
 
 # - Expected File
@@ -28,7 +33,6 @@ GET /echo HTTP/1.1
 Host: $LOCAL_HOST:$PORT
 User-Agent: curl/7.68.0
 Accept: */*
-
 EOF
 sed -i -e 's/$/\r/' "$EXPECTED_FILE"  # newlines should be CRLF
 

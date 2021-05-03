@@ -50,13 +50,6 @@ void static_request_handler::handle_request(const request& req, reply& rep)
 
   BOOST_LOG_TRIVIAL(info) << "Path: " << path;
 
-  // If path begins with /echo, serve echo responses
-  // Otherwise, serve static files
-  // if (path != "/static") {
-  //   rep = reply::stock_reply(reply::bad_request);
-  //   return;
-  // }
-
   // If path ends in slash (i.e. is a directory) then add "index.html".
   if (request_path[request_path.size() - 1] == '/')
   {

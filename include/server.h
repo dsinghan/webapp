@@ -25,8 +25,6 @@ private:
 
   boost::asio::io_service& io_service_;
   boost::asio::ip::tcp::acceptor acceptor_;
-  // http::server::echo_request_handler echo_handler_;
-  // http::server::static_request_handler static_handler_;
   std::map<std::string, http::server::request_handler*> locations_;
 };
 

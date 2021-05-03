@@ -87,14 +87,6 @@ int main(int argc, char* argv[])
     // Extract locations mapping
     std::map<std::string, http::server::request_handler*> locations = config_parser.get_locations(&config);
 
-    // for (auto const& x : locations)
-    // {
-    //     std::cout << x.first  // string (key)
-    //               << ':' 
-    //               << x.second // string's value
-    //               << std::endl;
-    // }
-
     BOOST_LOG_TRIVIAL(info) << "Starting server";
 
     server s(io_service, port, locations);

@@ -22,7 +22,6 @@ public:
 
 private:
   /// The directory containing the files to be served.
-  // std::string doc_root_;
   std::string base_path_;
 };
 

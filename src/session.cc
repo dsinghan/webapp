@@ -8,8 +8,6 @@
 using boost::asio::ip::tcp;
 session::session(
   boost::asio::io_service& io_service,
-  // http::server::echo_request_handler& echo_request_handler,
-  // http::server::static_request_handler& static_request_handler,
   std::map<std::string, http::server::request_handler*> locations
 )
 : socket_(io_service), locations_(locations)
@@ -73,6 +71,7 @@ int session::handle_read(const boost::system::error_code& error,
 
         // Parse data into request object
         http::server::request_parser::result_type result;
+        request_parser_.reset();
         std::tie(result, std::ignore) = request_parser_.parse(
               request_, data_, data_ + bytes_transferred);
 
