@@ -61,19 +61,6 @@ std::string session::determine_path(http::server::request req) {
   }
 
   return path;
-
-  // If path begins with /echo, serve echo responses
-  // Otherwise, serve static files
-
-  // if (path == "/echo") {
-  //   return 1;
-  // }
-  // else if (path == "/static") {
-  //   return 2;
-  // }
-  // else {
-  //   return 0;
-  // }
 }
 
 int session::handle_read(const boost::system::error_code& error,
@@ -101,72 +88,19 @@ int session::handle_read(const boost::system::error_code& error,
 
               base_path = locations_[path];
               static_request_handler_.handle_request(request_, reply_, base_path);
-
-              boost::asio::async_write(socket_,
-                  reply_.to_buffers(),
-                  boost::bind(&session::handle_write, this,
-                  boost::asio::placeholders::error));
             }
+            
             // Echo response
             else {
               BOOST_LOG_TRIVIAL(info) << "Handling echo request";
 
               echo_request_handler_.handle_request(request_, reply_);
-
-              boost::asio::streambuf response_buffer;
-              std::ostream response_stream(&response_buffer);
-              response_stream << "HTTP/1.1 200 OK\r\n";
-              response_stream << "Content-Type: text/plain\r\n";
-              response_stream << "Content-Length: " << bytes_transferred << "\r\n\r\n";
-              response_stream << std::string(data_, data_ + bytes_transferred);
-
-              boost::asio::async_write(socket_,
-                  response_buffer,
+            }
+            
+            boost::asio::async_write(socket_,
+                  reply_.to_buffers(),
                   boost::bind(&session::handle_write, this,
                   boost::asio::placeholders::error));
-            }
-
-
-
-
-
-
-            
-            // if (path == "/echo") { // echo
-            //   BOOST_LOG_TRIVIAL(info) << "Handling echo request";
-
-            //   echo_request_handler_.handle_request(request_, reply_);
-
-            //   boost::asio::streambuf response_buffer;
-            //   std::ostream response_stream(&response_buffer);
-            //   response_stream << "HTTP/1.1 200 OK\r\n";
-            //   response_stream << "Content-Type: text/plain\r\n";
-            //   response_stream << "Content-Length: " << bytes_transferred << "\r\n\r\n";
-            //   response_stream << std::string(data_, data_ + bytes_transferred);
-
-            //   boost::asio::async_write(socket_,
-            //       response_buffer,
-            //       boost::bind(&session::handle_write, this,
-            //       boost::asio::placeholders::error));
-
-            //   return 0;
-            // } else { // static
-            //   std::string base_path;
-            //   if ( locations_.find(path) != locations_.end() ) {
-            //     BOOST_LOG_TRIVIAL(info) << "Handling static request";
-            //     base_path = locations_[path];
-            //   } else {
-            //     BOOST_LOG_TRIVIAL(info) << "Handling Bad Request";
-            //     base_path = "NONE";  // If can't find static, then will just return bad request response.
-            //   }
-
-            //   static_request_handler_.handle_request(request_, reply_, base_path);
-
-            //   boost::asio::async_write(socket_,
-            //       reply_.to_buffers(),
-            //       boost::bind(&session::handle_write, this,
-            //       boost::asio::placeholders::error));
-            // }
           }
 
         // If bad HTTP request, produce "400 Bad Request" reply

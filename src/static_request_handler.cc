@@ -43,7 +43,7 @@ void static_request_handler::handle_request(const request& req, reply& rep, std:
   std::string path;
   if (second_slash_pos == std::string::npos) {
     path = request_path;
-    request_path = "";
+    request_path = "/";
   }
   else {
     path = request_path.substr(0, second_slash_pos);
@@ -60,7 +60,7 @@ void static_request_handler::handle_request(const request& req, reply& rep, std:
   // }
 
   // If path ends in slash (i.e. is a directory) then add "index.html".
-  if (request_path == "")
+  if (request_path[request_path.size() - 1] == '/')
   {
     request_path += "index.html";
   }

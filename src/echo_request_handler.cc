@@ -7,47 +7,34 @@
 #include "reply.h"
 #include "request.h"
 #include <iostream>
+#include <vector>
 
 namespace http {
 namespace server {
 
 void echo_request_handler::handle_request(const request& req, reply& rep)
 {
-  // Decode url to path.
-  std::string request_path;
-  if (!url_decode(req.uri, request_path))
-  {
-    rep = reply::stock_reply(reply::bad_request);
-    return;
+  rep.status = reply::ok;
+  rep.content.append(req.method);
+  rep.content += " ";
+  rep.content.append(req.uri);
+  rep.content += " HTTP/";
+  rep.content.append(std::to_string(req.http_version_major));
+  rep.content += ".";
+  rep.content.append(std::to_string(req.http_version_minor));
+  rep.content += "\r\n";
+  std::vector<header>::size_type sz = req.headers.size();
+  for (unsigned i = 0; i < sz; i++) {
+    rep.content.append(req.headers[i].name); 
+    rep.content += ": ";
+    rep.content.append(req.headers[i].value);
+    rep.content += "\r\n";
   }
-
-  // Request path must be absolute and not contain "..".
-  if (request_path.empty() || request_path[0] != '/'
-      || request_path.find("..") != std::string::npos)
-  {
-    rep = reply::stock_reply(reply::bad_request);
-    return;
-  }
-
-  // Extract /static or /echo path
-  std::size_t second_slash_pos = request_path.find_first_of("/", 1);
-  std::string path;
-  if (second_slash_pos == std::string::npos) {
-    path = request_path;
-  }
-  else {
-    path = request_path.substr(0, second_slash_pos);
-  }
-
-  // If path begins with /echo, serve echo responses
-  // Otherwise, serve static files
-  if (path == "/echo") {
-    rep.content = "echo";
-  }
-  else {
-    rep = reply::stock_reply(reply::not_found);
-  }
-  BOOST_LOG_TRIVIAL(info) << "Prepared Echo Response";
+  rep.headers.resize(2);
+  rep.headers[0].name = "Content-Length";
+  rep.headers[0].value = std::to_string(rep.content.size());
+  rep.headers[1].name = "Content-Type";
+  rep.headers[1].value = "text/plain";
   return;
 }
 
