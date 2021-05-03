@@ -55,15 +55,23 @@ target_link_libraries(config_parser_test config_parser request_handler echo_requ
 
 add_executable(session_test tests/session_test.cc)
 # target_link_libraries(session_test reply request_handler echo_request_handler static_request_handler request_parser mime_types session gtest_main Boost::log_setup Boost::log)
-target_link_libraries(session_test session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main Boost::log_setup Boost::log)
+target_link_libraries(session_test session config_parser request_handler echo_request_handler static_request_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
 
 add_executable(server_test tests/server_test.cc)
 target_link_libraries(server_test server session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main gmock_main Boost::log_setup Boost::log)
+
+add_executable(request_handler_test tests/request_handler_test.cc)
+target_link_libraries(request_handler_test config_parser request_handler echo_request_handler static_request_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
+
+add_executable(request_parser_test tests/request_parser_test.cc)
+target_link_libraries(request_parser_test request_parser gtest_main)
 
 # TODO(!): Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(request_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Integration Test
 add_test(
@@ -73,4 +81,4 @@ add_test(
 
 # TODO(!): Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS webserver session server config_parser request_handler request_parser echo_request_handler static_request_handler mime_types reply TESTS config_parser_test session_test server_test)
+generate_coverage_report(TARGETS webserver session server config_parser request_handler request_parser echo_request_handler static_request_handler TESTS config_parser_test session_test server_test request_handler_test request_parser_test)
