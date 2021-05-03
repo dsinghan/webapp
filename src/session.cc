@@ -8,11 +8,11 @@
 using boost::asio::ip::tcp;
 session::session(
   boost::asio::io_service& io_service,
-  http::server::echo_request_handler& echo_request_handler,
-  http::server::static_request_handler& static_request_handler,
-  std::map<std::string, std::string> locations
+  // http::server::echo_request_handler& echo_request_handler,
+  // http::server::static_request_handler& static_request_handler,
+  std::map<std::string, http::server::request_handler*> locations
 )
-: socket_(io_service), echo_request_handler_(echo_request_handler), static_request_handler_(static_request_handler), locations_(locations)
+: socket_(io_service), locations_(locations)
 {
 
 }
@@ -38,7 +38,8 @@ std::string session::determine_path(http::server::request req) {
     // Decode url to path.
   std::string request_path;
 
-  if (!static_request_handler_.url_decode(req.uri, request_path))
+  // accessing first request handler object to call url decode
+  if (!(locations_.begin()->second)->url_decode(req.uri, request_path))
   {
     return 0;
   }
@@ -86,17 +87,18 @@ int session::handle_read(const boost::system::error_code& error,
               std::string base_path;
               BOOST_LOG_TRIVIAL(info) << "Handling static request";
 
-              base_path = locations_[path];
-              static_request_handler_.handle_request(request_, reply_, base_path);
+              // base_path = locations_[path];
+              // static_request_handler_.handle_request(request_, reply_, base_path);
+              locations_.find(path)->second->handle_request(request_, reply_);
             }
             
             // Echo response
             else {
               BOOST_LOG_TRIVIAL(info) << "Handling echo request";
 
-              echo_request_handler_.handle_request(request_, reply_);
+              locations_.find("/echo")->second->handle_request(request_, reply_);
             }
-            
+
             boost::asio::async_write(socket_,
                   reply_.to_buffers(),
                   boost::bind(&session::handle_write, this,

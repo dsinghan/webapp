@@ -19,6 +19,7 @@
 #include "session.h"
 #include "server.h"
 #include "config_parser.h"
+#include "request_handler.h"
 
 using boost::asio::ip::tcp;
 namespace logging = boost::log;
@@ -84,7 +85,7 @@ int main(int argc, char* argv[])
     }
 
     // Extract locations mapping
-    std::map<std::string, std::string> locations = config_parser.get_locations(&config);
+    std::map<std::string, http::server::request_handler*> locations = config_parser.get_locations(&config);
 
     // for (auto const& x : locations)
     // {

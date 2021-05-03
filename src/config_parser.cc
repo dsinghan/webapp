@@ -20,6 +20,9 @@
 #include <boost/log/trivial.hpp>
 
 #include "config_parser.h"
+#include "request_handler.h"
+#include "echo_request_handler.h"
+#include "static_request_handler.h"
 
 std::string NginxConfig::ToString(int depth) {
   std::string serialized_config;
@@ -293,33 +296,33 @@ int NginxConfigParser::extract_port(const char* file_name, NginxConfig* config) 
   return stoi(port);
 }
 
-std::string NginxConfigParser::extract_root(const char* file_name, NginxConfig* config) {
-  // Returns the port specified in the given config file, or -1 if the file is not parsable.
+// std::string NginxConfigParser::extract_root(const char* file_name, NginxConfig* config) {
+//   // Returns the port specified in the given config file, or -1 if the file is not parsable.
 
-  // Parse the config file, creating a tree of config data that can later be accessed.
-  bool parse_status = Parse(file_name, config);
-  if (!parse_status) {
-    return "";
-  }
+//   // Parse the config file, creating a tree of config data that can later be accessed.
+//   bool parse_status = Parse(file_name, config);
+//   if (!parse_status) {
+//     return "";
+//   }
 
-  std::string root;
-  for (int i = 0; i < config->statements_.size(); i++) {
-  /* Looks for the config portion that is named server*/
-    if (!strcmp(config->statements_[i].get()->tokens_[0].c_str(),"server")) {
-      for (int j = 0; j < config->statements_[i].get()->child_block_.get()->statements_.size(); j++) {
-      /* Looks inside server for the parameter that is called listen */
-        if(!strcmp(config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[0].c_str(), "root")) {
-        /* Extracts the port number that follows listen */
-          root = config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[1].c_str();
-        }
-      }
-    }
-  }
-  return root;
-}
+//   std::string root;
+//   for (int i = 0; i < config->statements_.size(); i++) {
+//   /* Looks for the config portion that is named server*/
+//     if (!strcmp(config->statements_[i].get()->tokens_[0].c_str(),"server")) {
+//       for (int j = 0; j < config->statements_[i].get()->child_block_.get()->statements_.size(); j++) {
+//       /* Looks inside server for the parameter that is called listen */
+//         if(!strcmp(config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[0].c_str(), "root")) {
+//         /* Extracts the port number that follows listen */
+//           root = config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[1].c_str();
+//         }
+//       }
+//     }
+//   }
+//   return root;
+// }
 
-std::map<std::string, std::string> NginxConfigParser::get_locations(NginxConfig * config) {
-  std::map<std::string, std::string> locations;
+std::map<std::string, http::server::request_handler*> NginxConfigParser::get_locations(NginxConfig * config) {
+  std::map<std::string, http::server::request_handler*> locations;
 
   for (int i = 0; i < config->statements_.size(); i++) {
   /* Looks for the config portion that is named server */
@@ -329,7 +332,13 @@ std::map<std::string, std::string> NginxConfigParser::get_locations(NginxConfig 
         if(!strcmp(config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[0].c_str(), "location")) {
           std::string key = config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[1];
           std::string val = config->statements_[i].get()->child_block_.get()->statements_[j].get()->child_block_.get()->statements_[0]->tokens_[1];
-          locations[key] = val;
+          // if (val == "/echo") {
+          //   http::server::echo_request_handler han;
+          // }
+          // else {
+            http::server::static_request_handler han(val);
+          // }
+          locations[key] = &han;
         }
       }
     }

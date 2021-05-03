@@ -49,28 +49,28 @@ add_library(mime_types src/mime_types.cc)
 add_executable(webserver src/server_main.cc)
 target_link_libraries(webserver server session config_parser reply request_handler echo_request_handler static_request_handler request_parser mime_types Boost::system Boost::log_setup Boost::log pthread)
 
-# TODO(!): Update test executable name, srcs, and deps
-add_executable(config_parser_test tests/config_parser_test.cc)
-target_link_libraries(config_parser_test config_parser gtest_main Boost::log_setup Boost::log)
+# # TODO(!): Update test executable name, srcs, and deps
+# add_executable(config_parser_test tests/config_parser_test.cc)
+# target_link_libraries(config_parser_test config_parser gtest_main Boost::log_setup Boost::log)
 
-add_executable(session_test tests/session_test.cc)
-# target_link_libraries(session_test reply request_handler echo_request_handler static_request_handler request_parser mime_types session gtest_main Boost::log_setup Boost::log)
-target_link_libraries(session_test session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main Boost::log_setup Boost::log)
+# add_executable(session_test tests/session_test.cc)
+# # target_link_libraries(session_test reply request_handler echo_request_handler static_request_handler request_parser mime_types session gtest_main Boost::log_setup Boost::log)
+# target_link_libraries(session_test session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main Boost::log_setup Boost::log)
 
-add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main gmock_main Boost::log_setup Boost::log)
+# add_executable(server_test tests/server_test.cc)
+# target_link_libraries(server_test server session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main gmock_main Boost::log_setup Boost::log)
 
-# TODO(!): Update with test binary
-gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+# # TODO(!): Update with test binary
+# gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+# gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+# gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
-# Integration Test
-add_test(
-    NAME integration_test
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration_test.sh
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+# # Integration Test
+# add_test(
+#     NAME integration_test
+#     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration_test.sh
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # TODO(!): Update with target/test targets
-include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS webserver session server config_parser TESTS config_parser_test session_test server_test)
+# include(cmake/CodeCoverageReportConfig.cmake)
+# generate_coverage_report(TARGETS webserver session server config_parser) TESTS config_parser_test session_test server_test)

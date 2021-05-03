@@ -30,7 +30,7 @@ public:
   explicit request_handler();
 
   /// Handle a request and produce a reply.
-  void handle_request(const request& req, reply& rep);
+  virtual void handle_request(const request& req, reply& rep) = 0;
 
   /// Perform URL-decoding on a string. Returns false if the encoding was
   /// invalid.

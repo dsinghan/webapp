@@ -6,6 +6,8 @@
 #include <vector>
 #include <map>
 
+#include "request_handler.h"
+
 class NginxConfig;
 
 // The parsed representation of a single config statement.
@@ -40,7 +42,7 @@ class NginxConfigParser {
   //Extract base directory from config
   std::string extract_root(const char* file_name, NginxConfig* config);
 
-  std::map<std::string, std::string> get_locations(NginxConfig * config);
+  std::map<std::string, http::server::request_handler*> get_locations(NginxConfig * config);
 
  private:
   enum TokenType {

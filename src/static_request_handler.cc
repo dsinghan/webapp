@@ -11,14 +11,12 @@
 namespace http {
 namespace server {
 
-// static_request_handler::static_request_handler(const std::string& doc_root)
-//   : doc_root_(doc_root)
-// {
-// }
+static_request_handler::static_request_handler(const std::string& base_path) 
+  : base_path_(base_path)
+{
+}
 
-static_request_handler::static_request_handler() {}
-
-void static_request_handler::handle_request(const request& req, reply& rep, std::string base_path)
+void static_request_handler::handle_request(const request& req, reply& rep)
 {
   // Decode url to path.
   std::string request_path;
@@ -76,7 +74,7 @@ void static_request_handler::handle_request(const request& req, reply& rep, std:
   }
 
   // Open the file to send back.
-  std::string full_path = base_path + request_path;
+  std::string full_path = base_path_ + request_path;
   BOOST_LOG_TRIVIAL(info) << "Searching for file: " << full_path;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is)
