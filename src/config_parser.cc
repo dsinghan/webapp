@@ -301,7 +301,7 @@ std::map<std::string, http::server::request_handler*> NginxConfigParser::get_loc
       continue;
     }
 
-    std::string handler_location = parse_string(cur_statement->tokens_[1]);
+    std::string handler_location = remove_trailing_slashes(parse_string(cur_statement->tokens_[1]));
     std::string handler_name = cur_statement->tokens_[2];
     NginxConfig handler_config = *(cur_statement->child_block_.get());
 
@@ -358,4 +358,17 @@ std::string NginxConfigParser::parse_string(std::string raw_location) {
   }
 
   return parsed_location;
+}
+
+std::string NginxConfigParser::remove_trailing_slashes(const std::string & given_string) {
+  std::string ret (given_string);
+  std::string to_remove ("/");
+
+  std::size_t found = ret.find_last_not_of(to_remove);
+  if (found != std::string::npos)
+    ret.erase(found+1);
+  else
+    ret.clear();  // str is all whitespace
+
+  return ret;
 }

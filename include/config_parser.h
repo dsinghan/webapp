@@ -76,6 +76,8 @@ class NginxConfigParser {
   TokenType ParseToken(std::istream* input, std::string* value);
 
   http::server::request_handler * create_handler(std::string handler_name, std::string handler_location, const NginxConfig & handler_config);
+
+  std::string remove_trailing_slashes(const std::string & given_string);
 };
 
 #endif // CONFIG_PARSER_H

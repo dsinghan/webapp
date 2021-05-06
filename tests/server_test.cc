@@ -22,7 +22,7 @@ class MockSession : public session {
     MOCK_METHOD0(start, void());
 };
 
-// Test basic functionality of server
+// Ensure that we can instantiate a new server
 TEST_F(ServerTest, BasicServer) {
     boost::asio::io_service io_service;
     short port = 8080;
@@ -35,7 +35,7 @@ TEST_F(ServerTest, BasicServer) {
     delete s;
 }
 
-//test the handle_test function
+// Ensure that we can accept and start a session
 TEST_F(ServerTest, ServerHandleAccept) {
     config_parser.Parse("session_config", &config);
 
