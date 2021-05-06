@@ -1,16 +1,24 @@
-#include "echo_request_handler.h"
-#include <boost/log/trivial.hpp>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
+
+#include <boost/log/trivial.hpp>
+
+#include "echo_request_handler.h"
 #include "mime_types.h"
 #include "reply.h"
 #include "request.h"
-#include <iostream>
-#include <vector>
+#include "request_handler.h"
 
 namespace http {
 namespace server {
+
+echo_request_handler::echo_request_handler(std::string handler_location, const NginxConfig & handler_config)
+  : request_handler(handler_location, handler_config) {
+
+}
 
 void echo_request_handler::handle_request(const request& req, reply& rep)
 {

@@ -19,12 +19,8 @@ make -C "$BUILD_DIR" > /dev/null 2>&1
 
 # - Config File
 cat > "$CONFIG_FILE" << EOF
-server { 
-    listen $PORT; 
-    location /echo {
-    root /echo;
-    }
-  }
+port $PORT;
+location "/echo" EchoHandler { }
 EOF
 
 # - Expected File

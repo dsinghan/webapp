@@ -49,12 +49,13 @@ TEST_F(NginxConfigParserTest, NestedBrackets) {
   EXPECT_TRUE(success);
 }
 
-//Test portextraction function to ensure proper port extraction
+//Test port extraction function to ensure proper port extraction
 TEST_F(NginxConfigParserTest, PortExtraction) {
 
-  int port = parser.extract_port("example_config", &out_config);
+  parser.Parse("example_config", &out_config);
+  int port = parser.extract_port(&out_config);
 
-  EXPECT_EQ(8080,port);
+  EXPECT_EQ(8080, port);
 }
 
 //Test ToString function in config_parser

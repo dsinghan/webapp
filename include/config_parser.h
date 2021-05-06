@@ -1,5 +1,8 @@
 // An nginx config file parser.
 
+#ifndef CONFIG_PARSER_H
+#define CONFIG_PARSER_H
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -37,12 +40,16 @@ class NginxConfigParser {
   bool Parse(const char* file_name, NginxConfig* config);
 
   //Extract port from config
-  int extract_port(const char* file_name, NginxConfig* config);
+  int extract_port(NginxConfig* config);
 
   //Extract base directory from config
   std::string extract_root(const char* file_name, NginxConfig* config);
 
   std::map<std::string, http::server::request_handler*> get_locations(NginxConfig * config);
+
+  static NginxConfigStatement * find_statement(std::string keyword, const NginxConfig* config);
+
+  static std::string parse_string(std::string raw_location);
 
  private:
   enum TokenType {
@@ -67,4 +74,8 @@ class NginxConfigParser {
   };
 
   TokenType ParseToken(std::istream* input, std::string* value);
+
+  http::server::request_handler * create_handler(std::string handler_name, std::string handler_location, const NginxConfig & handler_config);
 };
+
+#endif // CONFIG_PARSER_H

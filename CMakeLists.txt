@@ -51,14 +51,14 @@ target_link_libraries(webserver server session config_parser reply request_handl
 
 # TODO(!): Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)
-target_link_libraries(config_parser_test config_parser request_handler echo_request_handler static_request_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
+target_link_libraries(config_parser_test config_parser static_request_handler request_handler echo_request_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
 
 add_executable(session_test tests/session_test.cc)
 # target_link_libraries(session_test reply request_handler echo_request_handler static_request_handler request_parser mime_types session gtest_main Boost::log_setup Boost::log)
 target_link_libraries(session_test session config_parser request_handler echo_request_handler static_request_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
 
 add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server session reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main gmock_main Boost::log_setup Boost::log)
+target_link_libraries(server_test server session config_parser reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main gmock_main Boost::log_setup Boost::log)
 
 add_executable(request_handler_test tests/request_handler_test.cc)
 target_link_libraries(request_handler_test config_parser request_handler echo_request_handler static_request_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)

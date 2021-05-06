@@ -271,54 +271,91 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
   return return_value;
 }
 
-int NginxConfigParser::extract_port(const char* file_name, NginxConfig* config) {
-  // Returns the port specified in the given config file, or -1 if the file is not parsable.
-
-  // Parse the config file, creating a tree of config data that can later be accessed.
-  bool parse_status = Parse(file_name, config);
-  if (!parse_status) {
-    return -1;
-  }
-
-  std::string port;
+NginxConfigStatement * NginxConfigParser::find_statement(std::string keyword, const NginxConfig* config) {
+  // Finds the statement whose first token is keyword
   for (int i = 0; i < config->statements_.size(); i++) {
-  /* Looks for the config portion that is named server*/
-    if (!strcmp(config->statements_[i].get()->tokens_[0].c_str(),"server")) {
-      for (int j = 0; j < config->statements_[i].get()->child_block_.get()->statements_.size(); j++) {
-      /* Looks inside server for the parameter that is called listen */
-        if(!strcmp(config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[0].c_str(), "listen")) {
-        /* Extracts the port number that follows listen */
-          port = config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[1].c_str();
-        }
-      }
+    NginxConfigStatement * cur_statement = config->statements_[i].get();
+    std::string first_token = cur_statement->tokens_[0];
+    if (first_token == keyword) {
+      return cur_statement;
     }
   }
-  return stoi(port);
+  return NULL;
+}
+
+int NginxConfigParser::extract_port(NginxConfig * config) {
+  // Returns the port specified in the given config file, or -1 if the file is not parsable.
+  NginxConfigStatement * port_statement = find_statement("port", config);
+  if (port_statement == NULL) {
+    return -1;
+  }
+  return stoi(port_statement->tokens_[1]);
 }
 
 std::map<std::string, http::server::request_handler*> NginxConfigParser::get_locations(NginxConfig * config) {
   std::map<std::string, http::server::request_handler*> locations;
 
   for (int i = 0; i < config->statements_.size(); i++) {
-  /* Looks for the config portion that is named server */
-    if (!strcmp(config->statements_[i].get()->tokens_[0].c_str(),"server")) {
-      for (int j = 0; j < config->statements_[i].get()->child_block_.get()->statements_.size(); j++) {
-      /* Looks inside server for the parameter that is called listen */
-        if(!strcmp(config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[0].c_str(), "location")) {
-          std::string key = config->statements_[i].get()->child_block_.get()->statements_[j]->tokens_[1];
-          std::string val = config->statements_[i].get()->child_block_.get()->statements_[j].get()->child_block_.get()->statements_[0]->tokens_[1];
-          http::server::request_handler *han;
-          if (val == "/echo") {
-            han = new http::server::echo_request_handler();
-          }
-          else {
-            han = new http::server::static_request_handler(val);
-          }
-          locations[key] = han;
-        }
-      }
+    NginxConfigStatement * cur_statement = config->statements_[i].get();
+    if (cur_statement->tokens_[0] != "location") {
+      continue;
+    }
+
+    std::string handler_location = parse_string(cur_statement->tokens_[1]);
+    std::string handler_name = cur_statement->tokens_[2];
+    NginxConfig handler_config = *(cur_statement->child_block_.get());
+
+    BOOST_LOG_TRIVIAL(debug) << "Handler location: " << handler_location << ", handler_name: " << handler_name;
+
+    http::server::request_handler * handler = create_handler(handler_name, handler_location, handler_config);
+    if (handler_location != "" && handler != nullptr) {
+      locations[handler_location] = handler;
+    } else {
+      BOOST_LOG_TRIVIAL(warning) << "Could not create handler " << handler_name << " for location " << handler_location;
     }
   }
 
   return locations;
+}
+
+http::server::request_handler * NginxConfigParser::create_handler(std::string handler_name, std::string handler_location, const NginxConfig & handler_config) {
+  if (handler_name == "StaticHandler") {
+    return new http::server::static_request_handler(handler_location, handler_config);
+  } else if (handler_name == "EchoHandler") {
+    return new http::server::echo_request_handler(handler_location, handler_config);
+  } else {
+    return nullptr;
+  }
+}
+
+std::string NginxConfigParser::parse_string(std::string raw_location) {
+  // Transforms a string in a config file into a usable form, handling quotes and escaped characters
+  // Returns empty string if invalid
+  std::string parsed_location = "";
+
+  int length = raw_location.size();
+  bool start_quote = false;
+  bool end_quote = false;
+  bool escaped = false;
+  for (int i = 0; i < length; i++) {
+    if (i == 0 && raw_location[i] == '"') {
+      start_quote = true;
+    } else if (!escaped && raw_location[i] == '\\') {
+      escaped = true;
+    } else if (escaped) {
+      // TODO: Handle escaped characters; this implementation simply ignores the backslash.
+      parsed_location += raw_location[i];
+      escaped = false;
+    } else if (i == length - 1 && raw_location[i] == '"') {
+      end_quote = true;
+    } else {
+      parsed_location += raw_location[i];
+    }
+  }
+
+  if (escaped || (start_quote && !end_quote) || (!start_quote && end_quote)) {
+    return "";
+  }
+
+  return parsed_location;
 }

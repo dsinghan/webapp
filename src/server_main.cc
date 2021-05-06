@@ -74,23 +74,23 @@ int main(int argc, char* argv[])
     BOOST_LOG_TRIVIAL(info) << "Parsing config file: " << argv[1];
     NginxConfigParser config_parser;
     NginxConfig config;
-    int port;
-    std::string dir;
 
-    // Extract port
-    port = config_parser.extract_port(argv[1], &config);
+    bool parse_status = config_parser.Parse(argv[1], &config);
+    if (!parse_status) {
+      BOOST_LOG_TRIVIAL(fatal) << "Could not parse config file: " << argv[1];
+      return 1;
+    }
+
+    int port = config_parser.extract_port(&config);
     if (port == -1) {
       BOOST_LOG_TRIVIAL(fatal) << "Could not extract port";
       return 1;
     }
 
-    // Extract locations mapping
     std::map<std::string, http::server::request_handler*> locations = config_parser.get_locations(&config);
 
-    BOOST_LOG_TRIVIAL(info) << "Starting server";
-
+    BOOST_LOG_TRIVIAL(info) << "Starting server with " << locations.size() << " locations on port " << port;
     server s(io_service, port, locations);
-
     io_service.run();
   }
   catch (std::exception& e)

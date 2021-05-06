@@ -1,15 +1,13 @@
-server {
-  listen 8080;
+port 8080;
 
-  location /echo {
-    root /echo;
-  }
+location "/echo" EchoHandler {
 
-  location /static1 {
-    root static112/;
-  }
+}
 
-  location /static2 {
-    root static212/;
-  }
+location "/static1" StaticHandler {
+  root "./static/static1";  # Should support relative path
+}
+
+location "/static2" StaticHandler {
+  root "./static/static2";
 }

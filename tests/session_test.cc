@@ -9,7 +9,7 @@ class sessionTest : public ::testing::Test {
     boost::asio::io_service io_service;
     NginxConfigParser parser;
     NginxConfig config;
-    bool value = parser.extract_port("sessionConfig", &config);
+    bool value = parser.Parse("sessionConfig", &config);
     std::map<std::string, http::server::request_handler*> locations = parser.get_locations(&config);
     session * mySession = new session(io_service,locations);
     bool success;

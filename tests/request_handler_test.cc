@@ -1,10 +1,14 @@
-#include "echo_request_handler.h"
-#include "gtest/gtest.h"
 #include <string>
+
+#include "gtest/gtest.h"
+
+#include "config_parser.h"
+#include "echo_request_handler.h"
 
 class requestHandlerTest : public ::testing::Test {
  protected:
-  http::server::echo_request_handler han;
+  NginxConfig config;
+  http::server::echo_request_handler han{"Blah", config};
   std::string output;
   bool success;
 };

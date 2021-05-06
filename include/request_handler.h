@@ -13,6 +13,9 @@
 
 #include <string>
 
+// #include "config_parser.h"
+class NginxConfig;
+
 namespace http {
 namespace server {
 
@@ -23,11 +26,11 @@ struct request;
 class request_handler
 {
 public:
+  // Prevent copying and copy-constructing
   request_handler(const request_handler&) = delete;
   request_handler& operator=(const request_handler&) = delete;
 
-  /// Construct with a directory containing files to be served.
-  explicit request_handler();
+  explicit request_handler(std::string handler_location, const NginxConfig & handler_config);
 
   /// Handle a request and produce a reply.
   virtual void handle_request(const request& req, reply& rep) = 0;
@@ -37,8 +40,7 @@ public:
   static bool url_decode(const std::string& in, std::string& out);
 
 private:
-  /// The directory containing the files to be served.
-  std::string doc_root_;
+  std::string handler_location_;
 };
 
 } // namespace server

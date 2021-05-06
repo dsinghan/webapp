@@ -2,7 +2,9 @@
 #define STATIC_REQUEST_HANDLER_HPP
 
 #include <string>
+
 #include "request_handler.h"
+#include "config_parser.h"
 
 namespace http {
 namespace server {
@@ -14,8 +16,7 @@ class static_request_handler : public request_handler
 {
 public:
   /// Construct with a directory containing files to be served.
-  // explicit static_request_handler(const std::string& doc_root);
-  explicit static_request_handler(const std::string& base_path);
+  explicit static_request_handler(std::string handler_location, const NginxConfig & handler_config);
 
   /// Handle a request and produce a reply.
   void handle_request(const request& req, reply& rep);

@@ -1,19 +1,24 @@
-#include <boost/log/trivial.hpp>
-#include "static_request_handler.h"
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
+
+#include <boost/log/trivial.hpp>
+
+#include "config_parser.h"
 #include "mime_types.h"
 #include "reply.h"
 #include "request.h"
-#include <iostream>
+#include "static_request_handler.h"
 
 namespace http {
 namespace server {
 
-static_request_handler::static_request_handler(const std::string& base_path) 
-  : base_path_(base_path)
+static_request_handler::static_request_handler(std::string handler_location, const NginxConfig & handler_config)
+  : request_handler(handler_location, handler_config)
 {
+  NginxConfigStatement * path_config_statement = NginxConfigParser::find_statement("root", &handler_config);
+  base_path_ = NginxConfigParser::parse_string(path_config_statement->tokens_[1]);
 }
 
 void static_request_handler::handle_request(const request& req, reply& rep)

@@ -13,6 +13,8 @@
 
 #include <tuple>
 
+#include "config_parser.h"
+
 namespace http {
 namespace server {
 
