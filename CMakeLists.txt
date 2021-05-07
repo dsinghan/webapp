@@ -44,24 +44,25 @@ add_library(echo_request_handler src/echo_request_handler.cc)
 add_library(static_request_handler src/static_request_handler.cc)
 add_library(request_parser src/request_parser.cc)
 add_library(mime_types src/mime_types.cc)
+add_library(error_handler src/error_handler.cc)
 
 # If refactor makes it necessary, update deps
 add_executable(webserver src/server_main.cc)
-target_link_libraries(webserver server session config_parser reply request_handler echo_request_handler static_request_handler request_parser mime_types Boost::system Boost::log_setup Boost::log pthread)
+target_link_libraries(webserver server session config_parser reply request_handler echo_request_handler static_request_handler error_handler request_parser mime_types Boost::system Boost::log_setup Boost::log pthread)
 
 # TODO(!): Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)
-target_link_libraries(config_parser_test config_parser static_request_handler request_handler echo_request_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
+target_link_libraries(config_parser_test config_parser static_request_handler request_handler echo_request_handler error_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
 
 add_executable(session_test tests/session_test.cc)
 # target_link_libraries(session_test reply request_handler echo_request_handler static_request_handler request_parser mime_types session gtest_main Boost::log_setup Boost::log)
-target_link_libraries(session_test session config_parser request_handler echo_request_handler static_request_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
+target_link_libraries(session_test session config_parser request_handler echo_request_handler static_request_handler error_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
 
 add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server session config_parser reply request_handler echo_request_handler static_request_handler request_parser mime_types gtest_main gmock_main Boost::log_setup Boost::log)
+target_link_libraries(server_test server session config_parser reply request_handler echo_request_handler static_request_handler error_handler request_parser mime_types gtest_main gmock_main Boost::log_setup Boost::log)
 
 add_executable(request_handler_test tests/request_handler_test.cc)
-target_link_libraries(request_handler_test config_parser request_handler echo_request_handler static_request_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
+target_link_libraries(request_handler_test config_parser request_handler echo_request_handler static_request_handler error_handler reply request_parser mime_types gtest_main Boost::log_setup Boost::log)
 
 add_executable(request_parser_test tests/request_parser_test.cc)
 target_link_libraries(request_parser_test request_parser gtest_main)
@@ -81,4 +82,4 @@ add_test(
 
 # TODO(!): Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS webserver session server config_parser request_handler request_parser echo_request_handler static_request_handler TESTS config_parser_test session_test server_test request_handler_test request_parser_test)
+generate_coverage_report(TARGETS webserver session server config_parser request_handler request_parser echo_request_handler static_request_handler error_handler TESTS config_parser_test session_test server_test request_handler_test request_parser_test)

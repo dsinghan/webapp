@@ -1,6 +1,6 @@
 # Format last updated 2021-05-05
 
-port 80;
+port 8080;
 
 location "/echo" EchoHandler {
 
@@ -13,3 +13,6 @@ location "/static1" StaticHandler {
 location "/static2" StaticHandler {
   root "./static/static2";
 }
+
+location "/" ErrorHandler {
+} 

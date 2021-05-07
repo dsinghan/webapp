@@ -65,43 +65,49 @@ std::string session::determine_path(http::server::request req) {
 int session::handle_read(const boost::system::error_code& error,
     size_t bytes_transferred)
 {
-  if (error) {
+    if (!error)
+    {
+
+    BOOST_LOG_TRIVIAL(info) << "Received request from " << socket_.remote_endpoint().address();
+
+    http::server::request_parser::result_type result;
+    request_parser_.reset();
+    std::tie(result, std::ignore) = request_parser_.parse(request_, data_, data_ + bytes_transferred);
+
+    if (result != http::server::request_parser::good) {
+      BOOST_LOG_TRIVIAL(warning) << "Producing 400 Bad Request";
+      reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
+      boost::asio::async_write(socket_,
+          reply_.to_buffers(),
+          boost::bind(&session::handle_write, this,
+          boost::asio::placeholders::error));
+      return 0;
+    }
+
+    std::string path = determine_path(request_);
+    http::server::request_handler * selected_request_handler;
+    if (locations_.find(path) != locations_.end()) {
+      selected_request_handler = locations_.find(path)->second;
+    } else {
+      selected_request_handler = locations_.find("/")->second;
+    }
+    BOOST_LOG_TRIVIAL(info) << "Handling request with path: " << path;
+    selected_request_handler->handle_request(request_, reply_);
+
+    boost::asio::async_write(socket_,
+          reply_.to_buffers(),
+          boost::bind(&session::handle_write, this,
+          boost::asio::placeholders::error));
+
+    return 0;
+  }
+  else {
+
+    BOOST_LOG_TRIVIAL(fatal) << "Error calling handle_write";
     delete this;
     return 1;
   }
 
-  BOOST_LOG_TRIVIAL(info) << "Received request from " << socket_.remote_endpoint().address();
-
-  http::server::request_parser::result_type result;
-  request_parser_.reset();
-  std::tie(result, std::ignore) = request_parser_.parse(request_, data_, data_ + bytes_transferred);
-
-  if (result != http::server::request_parser::good) {
-    BOOST_LOG_TRIVIAL(warning) << "Producing 400 Bad Request";
-    reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
-    boost::asio::async_write(socket_,
-        reply_.to_buffers(),
-        boost::bind(&session::handle_write, this,
-        boost::asio::placeholders::error));
-    return 0;
-  }
-
-  std::string path = determine_path(request_);
-  http::server::request_handler * selected_request_handler;
-  if (locations_.find(path) != locations_.end()) {
-    selected_request_handler = locations_.find(path)->second;
-  } else {
-    selected_request_handler = locations_.find("/echo")->second;
-  }
-  BOOST_LOG_TRIVIAL(info) << "Handling request with path: " << path;
-  selected_request_handler->handle_request(request_, reply_);
-
-  boost::asio::async_write(socket_,
-        reply_.to_buffers(),
-        boost::bind(&session::handle_write, this,
-        boost::asio::placeholders::error));
-
-  return 0;
 }
 
 int session::handle_write(const boost::system::error_code& error)
@@ -114,6 +120,7 @@ int session::handle_write(const boost::system::error_code& error)
     }
     else
     {
+        BOOST_LOG_TRIVIAL(fatal) << "ERROR";
         delete this;
         return 1;
     }

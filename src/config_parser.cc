@@ -23,6 +23,7 @@
 #include "request_handler.h"
 #include "echo_request_handler.h"
 #include "static_request_handler.h"
+#include "error_handler.h"
 
 std::string NginxConfig::ToString(int depth) {
   std::string serialized_config;
@@ -323,6 +324,8 @@ http::server::request_handler * NginxConfigParser::create_handler(std::string ha
     return new http::server::static_request_handler(handler_location, handler_config);
   } else if (handler_name == "EchoHandler") {
     return new http::server::echo_request_handler(handler_location, handler_config);
+  } else if (handler_name == "ErrorHandler") {
+    return new http::server::error_handler(handler_location,handler_config);
   } else {
     return nullptr;
   }
@@ -361,6 +364,9 @@ std::string NginxConfigParser::parse_string(std::string raw_location) {
 }
 
 std::string NginxConfigParser::remove_trailing_slashes(const std::string & given_string) {
+  if (given_string == "/") {
+    return given_string;
+  }
   std::string ret (given_string);
   std::string to_remove ("/");
 
