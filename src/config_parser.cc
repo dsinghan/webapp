@@ -25,13 +25,6 @@
 #include "request_handler.h"
 #include "static_request_handler.h"
 
-std::string NginxConfig::ToString(int depth) {
-  std::string serialized_config;
-  for (const auto& statement : statements_) {
-    serialized_config.append(statement->ToString(depth));
-  }
-  return serialized_config;
-}
 
 std::string NginxConfigStatement::ToString(int depth) {
   std::string serialized_statement;
@@ -56,6 +49,193 @@ std::string NginxConfigStatement::ToString(int depth) {
   }
   serialized_statement.append("\n");
   return serialized_statement;
+}
+
+
+std::string NginxConfig::ToString(int depth) {
+  std::string serialized_config;
+  for (const auto& statement : statements_) {
+    serialized_config.append(statement->ToString(depth));
+  }
+  return serialized_config;
+}
+
+bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
+  std::stack<NginxConfig*> config_stack;
+  config_stack.push(config);
+  TokenType last_token_type = TOKEN_TYPE_START;
+  TokenType token_type;
+  while (true) {
+    std::string token;
+    token_type = ParseToken(config_file, &token);
+    //printf ("%s: %s\n", TokenTypeAsString(token_type), token.c_str());
+    if (token_type == TOKEN_TYPE_ERROR) {
+      break;
+    }
+
+    if (token_type == TOKEN_TYPE_COMMENT) {
+      // Skip comments.
+      continue;
+    }
+
+    if (token_type == TOKEN_TYPE_START) {
+      // Error.
+      break;
+    } else if (token_type == TOKEN_TYPE_NORMAL ||
+               token_type == TOKEN_TYPE_QUOTED_STRING) {
+      if (last_token_type == TOKEN_TYPE_START ||
+          last_token_type == TOKEN_TYPE_STATEMENT_END ||
+          last_token_type == TOKEN_TYPE_START_BLOCK ||
+          last_token_type == TOKEN_TYPE_END_BLOCK ||
+          last_token_type == TOKEN_TYPE_NORMAL ||
+          last_token_type == TOKEN_TYPE_QUOTED_STRING) {
+        if (last_token_type != TOKEN_TYPE_NORMAL &&
+            last_token_type != TOKEN_TYPE_QUOTED_STRING) {
+          config_stack.top()->statements_.emplace_back(
+              new NginxConfigStatement);
+        }
+        config_stack.top()->statements_.back().get()->tokens_.push_back(
+            token);
+      } else {
+        // Error.
+        break;
+      }
+    } else if (token_type == TOKEN_TYPE_STATEMENT_END) {
+      if (last_token_type != TOKEN_TYPE_NORMAL &&
+          last_token_type != TOKEN_TYPE_QUOTED_STRING) {
+        // Error.
+        break;
+      }
+    } else if (token_type == TOKEN_TYPE_START_BLOCK) {
+      if (last_token_type != TOKEN_TYPE_NORMAL &&
+          last_token_type != TOKEN_TYPE_QUOTED_STRING) {
+        // Error.
+        break;
+      }
+      NginxConfig* const new_config = new NginxConfig;
+      config_stack.top()->statements_.back().get()->child_block_.reset(
+          new_config);
+      config_stack.push(new_config);
+    } else if (token_type == TOKEN_TYPE_END_BLOCK) {
+      /* Fixed issue of encapsulated brackets and empty brackets returning FALSE. */
+      if (last_token_type != TOKEN_TYPE_STATEMENT_END &&
+          last_token_type != TOKEN_TYPE_START_BLOCK &&
+          last_token_type != TOKEN_TYPE_END_BLOCK) {
+        // Error.
+        break;
+      }
+      config_stack.pop();
+    } else if (token_type == TOKEN_TYPE_EOF) {
+      if (last_token_type != TOKEN_TYPE_STATEMENT_END &&
+          last_token_type != TOKEN_TYPE_END_BLOCK &&
+          last_token_type != TOKEN_TYPE_START) {
+        // Error.
+        break;
+      }
+      return true;
+    } else {
+      // Error. Unknown token.
+      break;
+    }
+    last_token_type = token_type;
+  }
+
+  BOOST_LOG_TRIVIAL(error) << "Bad transition from " << TokenTypeAsString(last_token_type) << " to " << TokenTypeAsString(token_type);
+
+  return false;
+}
+
+bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
+  std::ifstream config_file;
+  config_file.open(file_name);
+  if (!config_file.good()) {
+    BOOST_LOG_TRIVIAL(error) << "Failed to open config file: " << file_name;
+    return false;
+  }
+
+  const bool return_value =
+      Parse(dynamic_cast<std::istream*>(&config_file), config);
+  config_file.close();
+  return return_value;
+}
+
+int NginxConfigParser::extract_port(NginxConfig * config) {
+  // Returns the port specified in the given config file, or -1 if the file is not parsable.
+  NginxConfigStatement * port_statement = find_statement("port", config);
+  if (port_statement == NULL) {
+    return -1;
+  }
+  return stoi(port_statement->tokens_[1]);
+}
+
+std::map<std::string, request_handler*> NginxConfigParser::get_locations(NginxConfig * config) {
+  std::map<std::string, request_handler*> locations;
+
+  for (int i = 0; i < config->statements_.size(); i++) {
+    NginxConfigStatement * cur_statement = config->statements_[i].get();
+    if (cur_statement->tokens_[0] != "location") {
+      continue;
+    }
+
+    std::string handler_location = remove_trailing_slashes(parse_string(cur_statement->tokens_[1]));
+    std::string handler_name = cur_statement->tokens_[2];
+    NginxConfig handler_config = *(cur_statement->child_block_.get());
+
+    BOOST_LOG_TRIVIAL(debug) << "Handler location: " << handler_location << ", handler_name: " << handler_name;
+
+    request_handler * handler = create_handler(handler_name, handler_location, handler_config);
+    if (handler_location != "" && handler != nullptr) {
+      locations[handler_location] = handler;
+    } else {
+      BOOST_LOG_TRIVIAL(warning) << "Could not create handler " << handler_name << " for location " << handler_location;
+    }
+  }
+
+  return locations;
+}
+
+NginxConfigStatement * NginxConfigParser::find_statement(std::string keyword, const NginxConfig* config) {
+  // Finds the statement whose first token is keyword
+  for (int i = 0; i < config->statements_.size(); i++) {
+    NginxConfigStatement * cur_statement = config->statements_[i].get();
+    std::string first_token = cur_statement->tokens_[0];
+    if (first_token == keyword) {
+      return cur_statement;
+    }
+  }
+  return NULL;
+}
+
+std::string NginxConfigParser::parse_string(std::string raw_location) {
+  // Transforms a string in a config file into a usable form, handling quotes and escaped characters
+  // Returns empty string if invalid
+  std::string parsed_location = "";
+
+  int length = raw_location.size();
+  bool start_quote = false;
+  bool end_quote = false;
+  bool escaped = false;
+  for (int i = 0; i < length; i++) {
+    if (i == 0 && raw_location[i] == '"') {
+      start_quote = true;
+    } else if (!escaped && raw_location[i] == '\\') {
+      escaped = true;
+    } else if (escaped) {
+      // TODO: Handle escaped characters; this implementation simply ignores the backslash.
+      parsed_location += raw_location[i];
+      escaped = false;
+    } else if (i == length - 1 && raw_location[i] == '"') {
+      end_quote = true;
+    } else {
+      parsed_location += raw_location[i];
+    }
+  }
+
+  if (escaped || (start_quote && !end_quote) || (!start_quote && end_quote)) {
+    return "";
+  }
+
+  return parsed_location;
 }
 
 const char* NginxConfigParser::TokenTypeAsString(TokenType type) {
@@ -173,152 +353,6 @@ NginxConfigParser::TokenType NginxConfigParser::ParseToken(std::istream* input,
   return TOKEN_TYPE_EOF;
 }
 
-bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
-  std::stack<NginxConfig*> config_stack;
-  config_stack.push(config);
-  TokenType last_token_type = TOKEN_TYPE_START;
-  TokenType token_type;
-  while (true) {
-    std::string token;
-    token_type = ParseToken(config_file, &token);
-    //printf ("%s: %s\n", TokenTypeAsString(token_type), token.c_str());
-    if (token_type == TOKEN_TYPE_ERROR) {
-      break;
-    }
-
-    if (token_type == TOKEN_TYPE_COMMENT) {
-      // Skip comments.
-      continue;
-    }
-
-    if (token_type == TOKEN_TYPE_START) {
-      // Error.
-      break;
-    } else if (token_type == TOKEN_TYPE_NORMAL ||
-               token_type == TOKEN_TYPE_QUOTED_STRING) {
-      if (last_token_type == TOKEN_TYPE_START ||
-          last_token_type == TOKEN_TYPE_STATEMENT_END ||
-          last_token_type == TOKEN_TYPE_START_BLOCK ||
-          last_token_type == TOKEN_TYPE_END_BLOCK ||
-          last_token_type == TOKEN_TYPE_NORMAL ||
-          last_token_type == TOKEN_TYPE_QUOTED_STRING) {
-        if (last_token_type != TOKEN_TYPE_NORMAL &&
-            last_token_type != TOKEN_TYPE_QUOTED_STRING) {
-          config_stack.top()->statements_.emplace_back(
-              new NginxConfigStatement);
-        }
-        config_stack.top()->statements_.back().get()->tokens_.push_back(
-            token);
-      } else {
-        // Error.
-        break;
-      }
-    } else if (token_type == TOKEN_TYPE_STATEMENT_END) {
-      if (last_token_type != TOKEN_TYPE_NORMAL &&
-          last_token_type != TOKEN_TYPE_QUOTED_STRING) {
-        // Error.
-        break;
-      }
-    } else if (token_type == TOKEN_TYPE_START_BLOCK) {
-      if (last_token_type != TOKEN_TYPE_NORMAL &&
-          last_token_type != TOKEN_TYPE_QUOTED_STRING) {
-        // Error.
-        break;
-      }
-      NginxConfig* const new_config = new NginxConfig;
-      config_stack.top()->statements_.back().get()->child_block_.reset(
-          new_config);
-      config_stack.push(new_config);
-    } else if (token_type == TOKEN_TYPE_END_BLOCK) {
-      /* Fixed issue of encapsulated brackets and empty brackets returning FALSE. */
-      if (last_token_type != TOKEN_TYPE_STATEMENT_END &&
-          last_token_type != TOKEN_TYPE_START_BLOCK &&
-          last_token_type != TOKEN_TYPE_END_BLOCK) {
-        // Error.
-        break;
-      }
-      config_stack.pop();
-    } else if (token_type == TOKEN_TYPE_EOF) {
-      if (last_token_type != TOKEN_TYPE_STATEMENT_END &&
-          last_token_type != TOKEN_TYPE_END_BLOCK &&
-          last_token_type != TOKEN_TYPE_START) {
-        // Error.
-        break;
-      }
-      return true;
-    } else {
-      // Error. Unknown token.
-      break;
-    }
-    last_token_type = token_type;
-  }
-
-  BOOST_LOG_TRIVIAL(error) << "Bad transition from " << TokenTypeAsString(last_token_type) << " to " << TokenTypeAsString(token_type);
-
-  return false;
-}
-
-bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
-  std::ifstream config_file;
-  config_file.open(file_name);
-  if (!config_file.good()) {
-    BOOST_LOG_TRIVIAL(error) << "Failed to open config file: " << file_name;
-    return false;
-  }
-
-  const bool return_value =
-      Parse(dynamic_cast<std::istream*>(&config_file), config);
-  config_file.close();
-  return return_value;
-}
-
-NginxConfigStatement * NginxConfigParser::find_statement(std::string keyword, const NginxConfig* config) {
-  // Finds the statement whose first token is keyword
-  for (int i = 0; i < config->statements_.size(); i++) {
-    NginxConfigStatement * cur_statement = config->statements_[i].get();
-    std::string first_token = cur_statement->tokens_[0];
-    if (first_token == keyword) {
-      return cur_statement;
-    }
-  }
-  return NULL;
-}
-
-int NginxConfigParser::extract_port(NginxConfig * config) {
-  // Returns the port specified in the given config file, or -1 if the file is not parsable.
-  NginxConfigStatement * port_statement = find_statement("port", config);
-  if (port_statement == NULL) {
-    return -1;
-  }
-  return stoi(port_statement->tokens_[1]);
-}
-
-std::map<std::string, request_handler*> NginxConfigParser::get_locations(NginxConfig * config) {
-  std::map<std::string, request_handler*> locations;
-
-  for (int i = 0; i < config->statements_.size(); i++) {
-    NginxConfigStatement * cur_statement = config->statements_[i].get();
-    if (cur_statement->tokens_[0] != "location") {
-      continue;
-    }
-
-    std::string handler_location = remove_trailing_slashes(parse_string(cur_statement->tokens_[1]));
-    std::string handler_name = cur_statement->tokens_[2];
-    NginxConfig handler_config = *(cur_statement->child_block_.get());
-
-    BOOST_LOG_TRIVIAL(debug) << "Handler location: " << handler_location << ", handler_name: " << handler_name;
-
-    request_handler * handler = create_handler(handler_name, handler_location, handler_config);
-    if (handler_location != "" && handler != nullptr) {
-      locations[handler_location] = handler;
-    } else {
-      BOOST_LOG_TRIVIAL(warning) << "Could not create handler " << handler_name << " for location " << handler_location;
-    }
-  }
-
-  return locations;
-}
-
 request_handler * NginxConfigParser::create_handler(std::string handler_name, std::string handler_location, const NginxConfig & handler_config) {
   if (handler_name == "StaticHandler") {
     return new static_request_handler(handler_location, handler_config);
@@ -329,38 +363,6 @@ request_handler * NginxConfigParser::create_handler(std::string handler_name, st
   } else {
     return nullptr;
   }
-}
-
-std::string NginxConfigParser::parse_string(std::string raw_location) {
-  // Transforms a string in a config file into a usable form, handling quotes and escaped characters
-  // Returns empty string if invalid
-  std::string parsed_location = "";
-
-  int length = raw_location.size();
-  bool start_quote = false;
-  bool end_quote = false;
-  bool escaped = false;
-  for (int i = 0; i < length; i++) {
-    if (i == 0 && raw_location[i] == '"') {
-      start_quote = true;
-    } else if (!escaped && raw_location[i] == '\\') {
-      escaped = true;
-    } else if (escaped) {
-      // TODO: Handle escaped characters; this implementation simply ignores the backslash.
-      parsed_location += raw_location[i];
-      escaped = false;
-    } else if (i == length - 1 && raw_location[i] == '"') {
-      end_quote = true;
-    } else {
-      parsed_location += raw_location[i];
-    }
-  }
-
-  if (escaped || (start_quote && !end_quote) || (!start_quote && end_quote)) {
-    return "";
-  }
-
-  return parsed_location;
 }
 
 std::string NginxConfigParser::remove_trailing_slashes(const std::string & given_string) {

@@ -1,4 +1,4 @@
-// tt
+// Adapted From:
 // async_tcp_echo_server.cpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~
 //
@@ -20,7 +20,6 @@
 
 namespace logging = boost::log;
 namespace keywords = boost::log::keywords;
-
 
 int main(int argc, char* argv[])
 {

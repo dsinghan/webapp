@@ -42,9 +42,6 @@ class NginxConfigParser {
   //Extract port from config
   int extract_port(NginxConfig* config);
 
-  //Extract base directory from config
-  std::string extract_root(const char* file_name, NginxConfig* config);
-
   std::map<std::string, request_handler*> get_locations(NginxConfig * config);
 
   static NginxConfigStatement * find_statement(std::string keyword, const NginxConfig* config);
