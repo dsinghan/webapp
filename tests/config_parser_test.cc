@@ -11,7 +11,7 @@ class NginxConfigParserTest : public ::testing::Test {
 
 TEST_F(NginxConfigParserTest, ExampleConfig) {
 
-  bool success = parser.Parse("example_config", &out_config);
+  bool success = parser.Parse("sample_configs/example_config", &out_config);
 
   EXPECT_TRUE(success);
 }
@@ -19,7 +19,7 @@ TEST_F(NginxConfigParserTest, ExampleConfig) {
 //Checks and ensures that even number of quotes in a file (e.g. can't have """)
 TEST_F(NginxConfigParserTest, BackslashedQuoteInString) {
 
-  bool success = parser.Parse("quote_in_string_backslashed", &out_config);
+  bool success = parser.Parse("sample_configs/quote_in_string_backslashed", &out_config);
 
   EXPECT_TRUE(success);
 }
@@ -27,7 +27,7 @@ TEST_F(NginxConfigParserTest, BackslashedQuoteInString) {
 //Checks for empty file, returns true. Fixed bug in code
 TEST_F(NginxConfigParserTest, Empty_file) {
 
-  bool success = parser.Parse("empty_file", &out_config);
+  bool success = parser.Parse("sample_configs/empty_file", &out_config);
 
   EXPECT_TRUE(success);
 }
@@ -36,7 +36,7 @@ TEST_F(NginxConfigParserTest, Empty_file) {
 //an opening bracket. Fixed bug where anything after double quote is acceptable.
 TEST_F(NginxConfigParserTest, QuoteFollowedByLetter) {
 
-  bool success = parser.Parse("quote_followed_by_letter", &out_config);
+  bool success = parser.Parse("sample_configs/quote_followed_by_letter", &out_config);
 
   EXPECT_FALSE(success);
 }
@@ -44,7 +44,7 @@ TEST_F(NginxConfigParserTest, QuoteFollowedByLetter) {
 //Found bug with nested brackets returning false. Fixed code in coding_parser.cc
 TEST_F(NginxConfigParserTest, NestedBrackets) {
 
-  bool success = parser.Parse("nested_brackets", &out_config);
+  bool success = parser.Parse("sample_configs/nested_brackets", &out_config);
 
   EXPECT_TRUE(success);
 }
@@ -52,7 +52,7 @@ TEST_F(NginxConfigParserTest, NestedBrackets) {
 //Test port extraction function to ensure proper port extraction
 TEST_F(NginxConfigParserTest, PortExtraction) {
 
-  parser.Parse("example_config", &out_config);
+  parser.Parse("sample_configs/example_config", &out_config);
   int port = parser.extract_port(&out_config);
 
   EXPECT_EQ(8080, port);
@@ -61,7 +61,7 @@ TEST_F(NginxConfigParserTest, PortExtraction) {
 //Test ToString function in config_parser
 TEST_F(NginxConfigParserTest, ToStringTest) {
 
-  parser.Parse("toStringTest", &out_config);
+  parser.Parse("sample_configs/toStringTest", &out_config);
 
   std::string result = out_config.ToString();
 
@@ -80,10 +80,9 @@ TEST_F(NginxConfigParserTest, UnknownConfigFile) {
 
 //test various bad transitions during parsing of config file
 TEST_F(NginxConfigParserTest, BadTransition) {
-
-  EXPECT_FALSE(parser.Parse("bad_transition1", &out_config));
-  EXPECT_FALSE(parser.Parse("bad_transition2", &out_config));
-  EXPECT_FALSE(parser.Parse("bad_transition3", &out_config));
-  EXPECT_FALSE(parser.Parse("bad_transition4", &out_config));
-  EXPECT_FALSE(parser.Parse("bad_transition5", &out_config));
+  EXPECT_FALSE(parser.Parse("sample_configs/bad_transition1", &out_config));
+  EXPECT_FALSE(parser.Parse("sample_configs/bad_transition2", &out_config));
+  EXPECT_FALSE(parser.Parse("sample_configs/bad_transition3", &out_config));
+  EXPECT_FALSE(parser.Parse("sample_configs/bad_transition4", &out_config));
+  EXPECT_FALSE(parser.Parse("sample_configs/bad_transition5", &out_config));
 }
