@@ -11,7 +11,7 @@ class error_handler : public request_handler
 public:
     explicit error_handler(std::string handler_location, const NginxConfig & handler_config);
 
-    void handle_request(const request& req, reply& rep);
+    boost::beast::http::response<boost::beast::http::string_body> handle_request(const boost::beast::http::request<boost::beast::http::string_body>& request);
 
 };
 

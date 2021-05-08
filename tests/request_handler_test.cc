@@ -8,7 +8,7 @@
 class requestHandlerTest : public ::testing::Test {
  protected:
   NginxConfig config;
-  http::server::echo_request_handler han{"Blah", config};
+  echo_request_handler han{"Blah", config};
   std::string output;
   bool success;
 };

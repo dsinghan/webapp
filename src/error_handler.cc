@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "reply.h"
-#include "request.h"
+#include <boost/log/trivial.hpp>
+
 #include "error_handler.h"
 #include "config_parser.h"
 
@@ -17,10 +17,14 @@ error_handler::error_handler(std::string handler_location, const NginxConfig & h
   : request_handler(handler_location, handler_config)
 {}
 
-void error_handler::handle_request(const request& req, reply& rep) 
+boost::beast::http::response<boost::beast::http::string_body> error_handler::handle_request(const boost::beast::http::request<boost::beast::http::string_body>& request)
 {
-    rep = reply::stock_reply(reply::not_found);
-    return;
+    BOOST_LOG_TRIVIAL(warning) << "Producing 404 Not Found";
+    boost::beast::http::response<boost::beast::http::string_body> res{boost::beast::http::status::not_found, request.version()};
+    res.set(boost::beast::http::field::content_type, "text/html");
+    res.body() = "404 Not Found";
+    res.prepare_payload();
+    return res;
 }
 
 

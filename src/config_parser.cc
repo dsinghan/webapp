@@ -293,8 +293,8 @@ int NginxConfigParser::extract_port(NginxConfig * config) {
   return stoi(port_statement->tokens_[1]);
 }
 
-std::map<std::string, http::server::request_handler*> NginxConfigParser::get_locations(NginxConfig * config) {
-  std::map<std::string, http::server::request_handler*> locations;
+std::map<std::string, request_handler*> NginxConfigParser::get_locations(NginxConfig * config) {
+  std::map<std::string, request_handler*> locations;
 
   for (int i = 0; i < config->statements_.size(); i++) {
     NginxConfigStatement * cur_statement = config->statements_[i].get();
@@ -308,7 +308,7 @@ std::map<std::string, http::server::request_handler*> NginxConfigParser::get_loc
 
     BOOST_LOG_TRIVIAL(debug) << "Handler location: " << handler_location << ", handler_name: " << handler_name;
 
-    http::server::request_handler * handler = create_handler(handler_name, handler_location, handler_config);
+    request_handler * handler = create_handler(handler_name, handler_location, handler_config);
     if (handler_location != "" && handler != nullptr) {
       locations[handler_location] = handler;
     } else {
@@ -319,13 +319,13 @@ std::map<std::string, http::server::request_handler*> NginxConfigParser::get_loc
   return locations;
 }
 
-http::server::request_handler * NginxConfigParser::create_handler(std::string handler_name, std::string handler_location, const NginxConfig & handler_config) {
+request_handler * NginxConfigParser::create_handler(std::string handler_name, std::string handler_location, const NginxConfig & handler_config) {
   if (handler_name == "StaticHandler") {
-    return new http::server::static_request_handler(handler_location, handler_config);
+    return new static_request_handler(handler_location, handler_config);
   } else if (handler_name == "EchoHandler") {
-    return new http::server::echo_request_handler(handler_location, handler_config);
+    return new echo_request_handler(handler_location, handler_config);
   } else if (handler_name == "ErrorHandler") {
-    return new http::server::error_handler(handler_location,handler_config);
+    return new http::server::error_handler(handler_location, handler_config);
   } else {
     return nullptr;
   }

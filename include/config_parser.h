@@ -45,7 +45,7 @@ class NginxConfigParser {
   //Extract base directory from config
   std::string extract_root(const char* file_name, NginxConfig* config);
 
-  std::map<std::string, http::server::request_handler*> get_locations(NginxConfig * config);
+  std::map<std::string, request_handler*> get_locations(NginxConfig * config);
 
   static NginxConfigStatement * find_statement(std::string keyword, const NginxConfig* config);
 
@@ -75,7 +75,7 @@ class NginxConfigParser {
 
   TokenType ParseToken(std::istream* input, std::string* value);
 
-  http::server::request_handler * create_handler(std::string handler_name, std::string handler_location, const NginxConfig & handler_config);
+  request_handler * create_handler(std::string handler_name, std::string handler_location, const NginxConfig & handler_config);
 
   std::string remove_trailing_slashes(const std::string & given_string);
 };

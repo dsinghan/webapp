@@ -5,6 +5,7 @@
 #include "echo_request_handler.h"
 #include "server.h"
 #include "static_request_handler.h"
+#include "error_handler.h"
 
 using ::testing::_;
 
@@ -18,7 +19,7 @@ protected:
 
 class MockSession : public session {
     public:
-    MockSession(boost::asio::io_service& io_service, std::map<std::string, http::server::request_handler*> locations) : session(io_service, locations) {}
+    MockSession(boost::asio::io_service& io_service, std::map<std::string, request_handler*> locations) : session(io_service, locations) {}
     MOCK_METHOD0(start, void());
 };
 
@@ -27,7 +28,7 @@ TEST_F(ServerTest, BasicServer) {
     boost::asio::io_service io_service;
     short port = 8080;
     server * s = nullptr;
-    std::map<std::string, http::server::request_handler*> locations;
+    std::map<std::string, request_handler*> locations;
     s = new server(io_service, port, locations);
 
     EXPECT_TRUE(s != nullptr);
@@ -41,7 +42,7 @@ TEST_F(ServerTest, ServerHandleAccept) {
 
     boost::asio::io_service io_service;
     int port = config_parser.extract_port(&config);
-    std::map<std::string, http::server::request_handler*> locations = config_parser.get_locations(&config);
+    std::map<std::string, request_handler*> locations = config_parser.get_locations(&config);
     server * s = new server(io_service, port, locations);
 
     session * curr_sess = new session(io_service, locations);
@@ -58,8 +59,8 @@ TEST_F(ServerTest, ServerHandleAccept) {
 //     server * s = nullptr;
 //     std::map<std::string, std::string> locations;
 //     s = new server(session.io_service, port, locations);
-//     http::server::echo_request_handler* echo_handler_ = new http::server::echo_request_handler();
-//     http::server::static_request_handler* static_handler_ = new http::server::static_request_handler();
+//     echo_request_handler* echo_handler_ = new echo_request_handler();
+//     static_request_handler* static_handler_ = new static_request_handler();
 //     session * curr_sess = new session(io_service, *echo_handler_, *static_handler_, locations);
 
 //     boost::system::error_code error;

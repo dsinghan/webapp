@@ -2,20 +2,16 @@
 #include <string>
 #include "echo_request_handler.h"
 #include "static_request_handler.h"
-#include "request_parser.h"
 #include <boost/log/trivial.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
 
-using boost::asio::ip::tcp;
 session::session(
   boost::asio::io_service& io_service,
-  std::map<std::string, http::server::request_handler*> locations
-)
-: socket_(io_service), locations_(locations)
-{
+  std::map<std::string, request_handler*> locations)
+  : socket_(io_service), locations_(locations) {}
 
-}
-
-tcp::socket& session::socket()
+boost::asio::ip::tcp::socket& session::socket()
 {
     return socket_;
 }
@@ -32,24 +28,24 @@ void session::start()
     async_read();
 }
 
-std::string session::determine_path(http::server::request req) {
-    // Decode url to path.
+std::string session::determine_path(const boost::beast::http::request<boost::beast::http::string_body>& req) {
   std::string request_path;
 
-  // accessing first request handler object to call url decode
-  if (!(locations_.begin()->second)->url_decode(req.uri, request_path))
+  // Decode url to path.
+  if (!(locations_.begin()->second)->url_decode(std::string(req.target()), request_path))
   {
     return 0;
   }
 
   // Request path must be absolute and not contain "..".
-  if (request_path.empty() || request_path[0] != '/'
-      || request_path.find("..") != std::string::npos)
+  if( req.target().empty() ||
+        req.target()[0] != '/' ||
+        req.target().find("..") != boost::beast::string_view::npos)
   {
     return 0;
   }
 
-  // Extract /static or /echo path
+  // Extract /static or /echo path and return.
   std::size_t second_slash_pos = request_path.find_first_of("/", 1);
   std::string path;
   if (second_slash_pos == std::string::npos) {
@@ -65,49 +61,46 @@ std::string session::determine_path(http::server::request req) {
 int session::handle_read(const boost::system::error_code& error,
     size_t bytes_transferred)
 {
-    if (!error)
-    {
-
-    BOOST_LOG_TRIVIAL(info) << "Received request from " << socket_.remote_endpoint().address();
-
-    http::server::request_parser::result_type result;
-    request_parser_.reset();
-    std::tie(result, std::ignore) = request_parser_.parse(request_, data_, data_ + bytes_transferred);
-
-    if (result != http::server::request_parser::good) {
-      BOOST_LOG_TRIVIAL(warning) << "Producing 400 Bad Request";
-      reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
-      boost::asio::async_write(socket_,
-          reply_.to_buffers(),
-          boost::bind(&session::handle_write, this,
-          boost::asio::placeholders::error));
-      return 0;
+  if (error) {
+      delete this;
+      return 1;
     }
 
+  BOOST_LOG_TRIVIAL(info) << "Received request from " << socket_.remote_endpoint().address();
+
+  boost::beast::http::request_parser<boost::beast::http::string_body> parser_;
+  boost::system::error_code ec;
+
+  // Parse buffer into request object.
+  parser_.put(boost::asio::buffer(data_, max_length), ec);
+  request_ = parser_.get();
+
+  // If parser returns with an error, produce "bad request" response.
+  if (ec.value() != 0) {
+    BOOST_LOG_TRIVIAL(warning) << "Producing 400 Bad Request";
+    boost::beast::http::response<boost::beast::http::string_body> res{boost::beast::http::status::bad_request, request_.version()};
+    res.set(boost::beast::http::field::content_type, "text/html");
+    res.body() = "400 Bad Request";
+    res.prepare_payload();
+    response_ = res;
+  }
+
+  // If parser successfully parses, call appropriate handle_request.
+  else {
     std::string path = determine_path(request_);
-    http::server::request_handler * selected_request_handler;
+    request_handler * selected_request_handler;
     if (locations_.find(path) != locations_.end()) {
       selected_request_handler = locations_.find(path)->second;
     } else {
       selected_request_handler = locations_.find("/")->second;
     }
     BOOST_LOG_TRIVIAL(info) << "Handling request with path: " << path;
-    selected_request_handler->handle_request(request_, reply_);
-
-    boost::asio::async_write(socket_,
-          reply_.to_buffers(),
-          boost::bind(&session::handle_write, this,
-          boost::asio::placeholders::error));
-
-    return 0;
-  }
-  else {
-
-    BOOST_LOG_TRIVIAL(fatal) << "Error calling handle_write";
-    delete this;
-    return 1;
+    response_ = selected_request_handler->handle_request(request_);
   }
 
+  // Write response to client.
+  boost::beast::http::async_write(socket_, response_, boost::bind(&session::handle_write, this, boost::asio::placeholders::error));
+  return 0;
 }
 
 int session::handle_write(const boost::system::error_code& error)

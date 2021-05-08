@@ -2,7 +2,7 @@
 
 using boost::asio::ip::tcp;
 
-server::server(boost::asio::io_service& io_service, short port, std::map<std::string, http::server::request_handler*> locations)
+server::server(boost::asio::io_service& io_service, short port, std::map<std::string, request_handler*> locations)
 : io_service_(io_service),
     acceptor_(io_service, tcp::endpoint(tcp::v4(), port)),
     locations_(locations)
@@ -33,5 +33,4 @@ int server::handle_accept(session* new_session,
         start_accept();
         return 1;
     }
-
 }

@@ -12,18 +12,10 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "mime_types.h"
-#include "reply.h"
-#include "request.h"
 #include <iostream>
 
-namespace http {
-namespace server {
-
 request_handler::request_handler(std::string handler_location, const NginxConfig & handler_config):
-  handler_location_(handler_location) {
-
-}
+  handler_location_(handler_location) {}
 
 bool request_handler::url_decode(const std::string& in, std::string& out)
 {
@@ -63,6 +55,3 @@ bool request_handler::url_decode(const std::string& in, std::string& out)
   }
   return true;
 }
-
-} // namespace server
-} // namespace http

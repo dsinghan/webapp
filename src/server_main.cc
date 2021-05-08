@@ -21,7 +21,6 @@
 #include "config_parser.h"
 #include "request_handler.h"
 
-using boost::asio::ip::tcp;
 namespace logging = boost::log;
 namespace keywords = boost::log::keywords;
 
@@ -87,7 +86,7 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    std::map<std::string, http::server::request_handler*> locations = config_parser.get_locations(&config);
+    std::map<std::string, request_handler*> locations = config_parser.get_locations(&config);
 
     BOOST_LOG_TRIVIAL(info) << "Starting server with " << locations.size() << " locations on port " << port;
     server s(io_service, port, locations);

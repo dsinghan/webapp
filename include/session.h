@@ -5,25 +5,22 @@
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include "reply.h"
-#include "request.h"
+#include <boost/beast/http.hpp>
+
 #include "static_request_handler.h"
 #include "echo_request_handler.h"
-#include "request_parser.h"
-
-//using boost::asio::ip::tcp;
 
 class session
 {
 public:
   session(
     boost::asio::io_service& io_service,
-    std::map<std::string, http::server::request_handler*> locations
+    std::map<std::string, request_handler*> locations
   );
 
   boost::asio::ip::tcp::socket& socket();
 
-  std::string determine_path(http::server::request req);
+  std::string determine_path(const boost::beast::http::request<boost::beast::http::string_body>& req);
 
   void start();
 
@@ -38,16 +35,11 @@ public:
   enum { max_length = 1024 };
   char data_[max_length];
 
-  /// The incoming request.
-  http::server::request request_;
+  std::map<std::string, request_handler*> locations_;
 
-  /// The parser for the incoming request.
-  http::server::request_parser request_parser_;
+  boost::beast::http::response<boost::beast::http::string_body> response_;
 
-  /// The reply to be sent back to the client.
-  http::server::reply reply_;
-
-  std::map<std::string, http::server::request_handler*> locations_;
+  boost::beast::http::request<boost::beast::http::string_body> request_;
 };
 
 #endif
