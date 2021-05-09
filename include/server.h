@@ -4,12 +4,13 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
-#include <boost/bind.hpp>
-#include <boost/asio.hpp>
 
-#include "static_request_handler.h"
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+
 #include "echo_request_handler.h"
 #include "session.h"
+#include "static_request_handler.h"
 
 class server
 {

@@ -12,9 +12,9 @@
 #define HTTP_REQUEST_HANDLER_HPP
 
 #include <string>
+
 #include <boost/beast/http.hpp>
 
-// #include "config_parser.h"
 class NginxConfig;
 
 /// The common handler for all incoming requests.

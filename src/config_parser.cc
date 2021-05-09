@@ -13,17 +13,17 @@
 #include <memory>
 #include <stack>
 #include <string>
-#include <vector>
 #include <string.h>
+#include <vector>
 #include <map>
 
 #include <boost/log/trivial.hpp>
 
 #include "config_parser.h"
-#include "request_handler.h"
 #include "echo_request_handler.h"
-#include "static_request_handler.h"
 #include "error_handler.h"
+#include "request_handler.h"
+#include "static_request_handler.h"
 
 std::string NginxConfig::ToString(int depth) {
   std::string serialized_config;

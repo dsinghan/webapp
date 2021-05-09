@@ -1,10 +1,10 @@
-#include "session.h"
 #include <string>
-#include "echo_request_handler.h"
-#include "static_request_handler.h"
-#include <boost/log/trivial.hpp>
+
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
+#include <boost/log/trivial.hpp>
+
+#include "session.h"
 
 session::session(
   boost::asio::io_service& io_service,

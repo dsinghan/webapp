@@ -3,12 +3,12 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <boost/bind.hpp>
+
 #include <boost/asio.hpp>
 #include <boost/beast/http.hpp>
+#include <boost/bind.hpp>
 
-#include "static_request_handler.h"
-#include "echo_request_handler.h"
+#include "request_handler.h"
 
 class session
 {

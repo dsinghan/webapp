@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "request_handler.h"
 #include "config_parser.h"
+#include "request_handler.h"
 
 class static_request_handler : public request_handler
 {

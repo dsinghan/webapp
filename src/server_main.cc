@@ -7,19 +7,19 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-#include <iostream>
 #include <csignal>
+#include <iostream>
 
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/file.hpp>
 
-#include "session.h"
-#include "server.h"
 #include "config_parser.h"
 #include "request_handler.h"
+#include "server.h"
+#include "session.h"
 
 namespace logging = boost::log;
 namespace keywords = boost::log::keywords;

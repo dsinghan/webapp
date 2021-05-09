@@ -8,11 +8,12 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "request_handler.h"
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <iostream>
+
+#include "request_handler.h"
 
 request_handler::request_handler(std::string handler_location, const NginxConfig & handler_config):
   handler_location_(handler_location) {}

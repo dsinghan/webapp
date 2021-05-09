@@ -34,31 +34,93 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 
 include_directories(include)
 
-# If refactor makes it necessary, update name and srcs
+#############
+# Libraries #
+#############
+
 add_library(session src/session.cc)
+target_link_libraries(session
+    request_handler
+    Boost::system
+    Boost::log_setup
+    Boost::log)
+
 add_library(server src/server.cc)
+
 add_library(config_parser src/config_parser.cc)
+target_link_libraries(config_parser
+    request_handler
+    echo_request_handler
+    static_request_handler
+    error_handler)
+
 add_library(request_handler src/request_handler.cc)
+
 add_library(echo_request_handler src/echo_request_handler.cc)
+target_link_libraries(echo_request_handler
+    Boost::system
+    Boost::log_setup
+    Boost::log)
+
 add_library(static_request_handler src/static_request_handler.cc)
+target_link_libraries(static_request_handler
+    config_parser
+    Boost::system
+    Boost::log_setup
+    Boost::log)
+
 add_library(error_handler src/error_handler.cc)
+target_link_libraries(error_handler
+    config_parser)
 
-# If refactor makes it necessary, update deps
+##############
+# Executable #
+##############
 add_executable(webserver src/server_main.cc)
-target_link_libraries(webserver server session config_parser request_handler echo_request_handler static_request_handler error_handler Boost::system Boost::log_setup Boost::log pthread)
+target_link_libraries(webserver
+    server
+    session
+    config_parser
+    request_handler
+    Boost::system
+    Boost::log_setup
+    Boost::log
+    pthread)
 
-# Update test executable name, srcs, and deps
+#########
+# Tests #
+#########
 add_executable(config_parser_test tests/config_parser_test.cc)
-target_link_libraries(config_parser_test config_parser static_request_handler request_handler echo_request_handler error_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(config_parser_test
+    config_parser
+    gtest_main)
 
 add_executable(session_test tests/session_test.cc)
-target_link_libraries(session_test session config_parser request_handler echo_request_handler static_request_handler error_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(session_test
+    session
+    config_parser
+    echo_request_handler
+    static_request_handler
+    gtest_main)
 
 add_executable(server_test tests/server_test.cc)
-target_link_libraries(server_test server session config_parser request_handler echo_request_handler static_request_handler error_handler gtest_main gmock_main Boost::log_setup Boost::log)
+target_link_libraries(server_test
+    server
+    session
+    config_parser
+    echo_request_handler
+    static_request_handler
+    error_handler
+    gtest_main
+    gmock_main)
 
 add_executable(request_handler_test tests/request_handler_test.cc)
-target_link_libraries(request_handler_test config_parser request_handler echo_request_handler static_request_handler error_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(request_handler_test
+    config_parser
+    echo_request_handler
+    gtest_main
+    Boost::log_setup
+    Boost::log)
 
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
