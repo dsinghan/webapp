@@ -73,6 +73,12 @@ add_library(error_handler src/error_handler.cc)
 target_link_libraries(error_handler
     config_parser)
 
+add_library(utils src/utils.cc)
+target_link_libraries(utils
+    Boost::system
+    Boost::log_setup
+    Boost::log)
+
 ##############
 # Executable #
 ##############
@@ -82,6 +88,7 @@ target_link_libraries(webserver
     session
     config_parser
     request_handler
+    utils
     Boost::system
     Boost::log_setup
     Boost::log
@@ -122,11 +129,15 @@ target_link_libraries(request_handler_test
     Boost::log_setup
     Boost::log)
 
+add_executable(utils_test tests/utils_test.cc)
+target_link_libraries(utils_test utils gtest_main Boost::log_setup Boost::log)
+
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(server_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(utils_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Integration Test
 add_test(
@@ -136,4 +147,6 @@ add_test(
 
 # Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS webserver session server config_parser request_handler echo_request_handler static_request_handler error_handler TESTS config_parser_test session_test server_test request_handler_test)
+generate_coverage_report(
+    TARGETS webserver session server config_parser request_handler echo_request_handler static_request_handler error_handler utils
+    TESTS config_parser_test session_test server_test request_handler_test utils_test)

@@ -7,9 +7,6 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-#include <csignal>
-#include <iostream>
-
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/utility/setup/console.hpp>
@@ -19,46 +16,15 @@
 #include "config_parser.h"
 #include "request_handler.h"
 #include "server.h"
-#include "session.h"
+#include "utils.h"
 
 namespace logging = boost::log;
 namespace keywords = boost::log::keywords;
 
-void init_logging() {
-  logging::register_simple_formatter_factory<logging::trivial::severity_level, char>("Severity");
-
-  logging::add_console_log(
-    std::cerr,
-    keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%"
-  );
-
-  logging::add_file_log(
-    keywords::file_name = "webserver_%N.log",
-    keywords::rotation_size = 10 * 1000 * 1000,  // 10 MB
-    keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0),  // Midnight
-    keywords::auto_flush = true,  // For reference: http://boost-log.sourceforge.net/libs/log/doc/html/log/detailed/sink_backends.html
-    keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%"
-  );
-
-  logging::core::get()->set_filter(
-    logging::trivial::severity >= logging::trivial::debug
-  );
-
-  logging::add_common_attributes();
-}
-
-
-void signal_handler( int signum ) {
-   BOOST_LOG_TRIVIAL(info) << "Interrupt signal (" << signum << ") received.\n";
-
-   exit(0);
-}
 
 int main(int argc, char* argv[])
 {
-  init_logging();
-  signal(SIGINT, signal_handler);
-  BOOST_LOG_TRIVIAL(info) << "Logging initialized";
+  init();
 
   try
   {
@@ -97,6 +63,4 @@ int main(int argc, char* argv[])
     BOOST_LOG_TRIVIAL(fatal) << "Exception: " << e.what();
     return 1;
   }
-
-  return 0;
 }

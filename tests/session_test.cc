@@ -4,6 +4,8 @@
 #include "static_request_handler.h"
 #include "config_parser.h"
 
+#include <string>
+
 class sessionTest : public ::testing::Test {
  protected:
     boost::asio::io_service io_service;
@@ -22,62 +24,74 @@ TEST_F(sessionTest, testGetLocation) {
 
 }
 
-// TEST_F(sessionTest, handleRead) {
-    
-//     boost::system::error_code error;
-//     char text[] = "Hello World";
-//     strncpy(mySession->data_,text,strlen(text));
+TEST_F(sessionTest, testPathDetermination) {
+    boost::beast::http::request<boost::beast::http::string_body> request;
+    std::string ret;
 
-//     int val = mySession->handle_read(error,12);
+    request.target("/");
+    ret = mySession->determine_path(request);
+    EXPECT_EQ(ret, "/");
 
-//     EXPECT_EQ(0,0);
+    request.target("");
+    mySession->determine_path(request);
+    EXPECT_EQ(ret, "/");
 
+    request.target("/../blah");
+    mySession->determine_path(request);
+    EXPECT_EQ(ret, "/");
 
-// }
+    request.target("abcde");
+    mySession->determine_path(request);
+    EXPECT_EQ(ret, "/");
 
-//Test a good handle write input
-// TEST_F(sessionTest, determinePath) {
-//     boost::beast::http::request<boost::beast::http::string_body> req;
-//     req.target() = "/static1/index.html";
-//     std::string ret = mySession->determine_path(req);
-//     std::cout << ret << std::endl;
-//     EXPECT_EQ("/static1",ret);
+    request.target("/static1/index.html");
+    ret = mySession->determine_path(request);
+    EXPECT_EQ(ret, "/static1");
 
-// }
+    request.target("/static1/");
+    ret = mySession->determine_path(request);
+    EXPECT_EQ(ret, "/static1");
 
-// //Tests to make sure errors are handled properly in handle_read
-// TEST_F(sessionTest, SessionTest) {
+    request.target("/static1/dir_name/dir_name");
+    ret = mySession->determine_path(request);
+    EXPECT_EQ(ret, "/static1/dir_name");
+}
 
-//     boost::system::error_code error;
-//     char text[] = "Hello World";
-//     strncpy(mySession->data_,text,strlen(text));
-//     error.assign(1, boost::system::system_category());
+//Tests to make sure errors are handled properly in handle_read
+TEST_F(sessionTest, SessionTest) {
 
-//     int ret = mySession->handle_read(error,strlen(text));
+    boost::system::error_code error = boost::system::errc::make_error_code(boost::system::errc::not_supported);
 
+    int ret = mySession->handle_read(error, 100);
 
-//     EXPECT_EQ(ret,1);
-
-// }
+    EXPECT_EQ(ret, 1);
+}
 
 //Tests to make sure errors are handled properly in handle_write
 TEST_F(sessionTest, testSession) {
-    
+
     boost::system::error_code error;
     error.assign(1, boost::system::system_category());
 
     int ret = mySession->handle_write(error);
 
-    EXPECT_EQ(ret,1);
-
+    EXPECT_EQ(ret, 1);
 }
 
 //Tests to make sure proper socket is returned in socket function
 TEST_F(sessionTest, testSocket) {
-    
+
     boost::asio::ip::tcp::socket * sock = &mySession->socket();
     int ret = (&mySession->socket_ == sock);
 
+    EXPECT_TRUE(ret);
 }
 
+//Tests to make sure proper socket is returned in socket function
+TEST_F(sessionTest, testPathExtensionRemoval) {
+    EXPECT_EQ(mySession->remove_path_extension("/hello/"), "/hello");
+    EXPECT_EQ(mySession->remove_path_extension("/hello/hello"), "/hello");
+    EXPECT_EQ(mySession->remove_path_extension("/hello"), "/");
+    EXPECT_EQ(mySession->remove_path_extension("hello"), "/");
+}
 
