@@ -34,7 +34,7 @@ std::string session::determine_path(const boost::beast::http::request<boost::bea
   // Decode url to path.
   if (!(locations_.begin()->second)->url_decode(std::string(req.target()), request_path))
   {
-    return 0;
+    return "/";
   }
 
   // Request path must be absolute and not contain "..".
@@ -42,17 +42,34 @@ std::string session::determine_path(const boost::beast::http::request<boost::bea
         req.target()[0] != '/' ||
         req.target().find("..") != boost::beast::string_view::npos)
   {
-    return 0;
+    return "/";
   }
 
-  // Extract /static or /echo path and return.
-  std::size_t second_slash_pos = request_path.find_first_of("/", 1);
+  BOOST_LOG_TRIVIAL(info) << "Request Path: " << request_path;
+
+  // Extract first potential request handler extension
+  //Subsequent potential paths will be obtained by calling remove_path_extension function in handle_read
+  int last_slash_pos = request_path.find_last_of('/');
+
+  //path only has one "/"
+  if (last_slash_pos == 0) {
+    return request_path;
+  }
+  //No '/' found
+  if (last_slash_pos == -1) {
+    return "/";
+  }
+
+  BOOST_LOG_TRIVIAL(info) << "Val: " << last_slash_pos;
+
   std::string path;
-  if (second_slash_pos == std::string::npos) {
+  if (last_slash_pos == std::string::npos) {
     path = request_path;
+    BOOST_LOG_TRIVIAL(info) << "Attempting Path: " << path;
   }
   else {
-    path = request_path.substr(0, second_slash_pos);
+    path = request_path.substr(0, last_slash_pos);
+    BOOST_LOG_TRIVIAL(info) << "Attempting Path: " << path;
   }
 
   return path;
@@ -89,13 +106,20 @@ int session::handle_read(const boost::system::error_code& error,
   else {
     std::string path = determine_path(request_);
     request_handler * selected_request_handler;
-    if (locations_.find(path) != locations_.end()) {
-      selected_request_handler = locations_.find(path)->second;
-    } else {
-      selected_request_handler = locations_.find("/")->second;
+
+    //Looks for the longest prefix that matches a request handler name
+    //If not found, remove trailing extension and try again
+    while (locations_.find(path) == locations_.end()) {
+      path = remove_path_extension(path);
     }
+
+    //get the request handler object for the matching request handler
+    selected_request_handler = locations_.find(path)->second;
+
+
     BOOST_LOG_TRIVIAL(info) << "Handling request with path: " << path;
     response_ = selected_request_handler->handle_request(request_);
+  
   }
 
   // Write response to client.
@@ -117,4 +141,23 @@ int session::handle_write(const boost::system::error_code& error)
         delete this;
         return 1;
     }
+}
+
+
+//cut off trailing extension from path.
+//For example: /static/hello/world would become /static/hello
+std::string session::remove_path_extension(std::string path) {
+
+  int last_slash_pos = path.find_last_of('/');
+
+  if (last_slash_pos == -1 || last_slash_pos == 0) {
+    path = "/";
+  } else {
+    path = path.substr(0, last_slash_pos);
+  }
+
+  BOOST_LOG_TRIVIAL(info) << "Attempting path: " << path;
+
+  return path;
+
 }

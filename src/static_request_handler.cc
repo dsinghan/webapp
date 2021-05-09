@@ -19,17 +19,8 @@ boost::beast::http::response<boost::beast::http::string_body> static_request_han
 {
   std::string request_path;
 
-  // Extract the request path.
-  std::size_t second_slash_pos = request.target().find_first_of("/", 1);
-  std::string path;
-  if (second_slash_pos == std::string::npos) {
-    path = std::string(request.target());
-    request_path = "/";
-  }
-  else {
-    path = std::string(request.target().substr(0, second_slash_pos));
-    request_path = std::string(request.target().substr(second_slash_pos));
-  }
+  //Get the request of the path, without the request handler portion.
+  request_path = std::string(request.target()).substr(handler_location_.length());
 
   // If path ends in slash (i.e. is a directory) then add "index.html".
   if (request_path[request_path.size() - 1] == '/')
@@ -40,14 +31,14 @@ boost::beast::http::response<boost::beast::http::string_body> static_request_han
   BOOST_LOG_TRIVIAL(info) << "Request Path: " << request_path;
 
   // Determine the file extension.
-  std::size_t last_slash_pos = request_path.find_last_of("/");
-  std::size_t last_dot_pos = request_path.find_last_of(".");
-  std::string extension;
-  if (last_dot_pos != std::string::npos && last_dot_pos > last_slash_pos)
-  {
-    extension = request_path.substr(last_dot_pos);
-    BOOST_LOG_TRIVIAL(debug) << "Got extension: " << extension;
-  }
+    std::size_t last_slash_pos = request_path.find_last_of("/");
+    std::size_t last_dot_pos = request_path.find_last_of(".");
+    std::string extension;
+    if (last_dot_pos != std::string::npos && last_dot_pos > last_slash_pos)
+    {
+      extension = request_path.substr(last_dot_pos);
+      BOOST_LOG_TRIVIAL(debug) << "Got extension: " << extension;
+    }
 
   // Append base path to request path and pen the file to send back.
   std::string full_path = base_path_ + request_path;

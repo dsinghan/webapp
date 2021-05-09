@@ -29,6 +29,8 @@ public:
   int handle_read(const boost::system::error_code& error,
       size_t bytes_transferred);
 
+  std::string remove_path_extension(std::string path);
+
   int handle_write(const boost::system::error_code& error);
 
   boost::asio::ip::tcp::socket socket_;
