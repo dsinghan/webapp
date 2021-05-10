@@ -18,17 +18,20 @@ public:
     std::map<std::string, request_handler*> locations
   );
 
+  //returns the server socket.
   boost::asio::ip::tcp::socket& socket();
 
+  //gets the URL path and determines the first possible location of the request handler
   std::string determine_path(const boost::beast::http::request<boost::beast::http::string_body>& req);
 
   void start();
 
   void async_read();
-// private:
+  // private:
   int handle_read(const boost::system::error_code& error,
       size_t bytes_transferred);
 
+  //removes the trailing path of the URL request. For example /static1/index.html -> /static1
   std::string remove_path_extension(std::string path);
 
   int handle_write(const boost::system::error_code& error);
