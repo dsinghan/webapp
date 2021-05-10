@@ -17,8 +17,18 @@ Step 4: Build the web server
 Step 5: Run the tests   
 `make test`  
 
-Step 6: Run the server. But first, go back to the `powell-cat` directory.   
-`cd ..`    
+Step 6: Return to the `powell-cat` directory   
+`cd ..`
+
+Step 7: Generate test code coverage report 
+```
+  $ mkdir build_coverage
+  $ cd build_coverage
+  $ cmake -DCMAKE_BUILD_TYPE=Coverage ..
+  $ make coverage
+```
+
+Step 8: Run the server. But first, go back to the `powell-cat` directory.   
 `build/bin/webserver conf/my_config`
 
 
@@ -38,11 +48,10 @@ To add a new request handler in the conf/my_config file:
 * URL_PATH: the path the user provides
 * REQUEST_HANDLER_NAME: the name of your new class
 * DIR_PATH: the path to the directory
-You can see examples in the conf/my_config file. 
-
-
-
-The config parser decides which request handler we should use. There are three types of request handler classes: static, echo, and error. Each one inherits from the "request_handler" base class. They each override the `handle_request` method, which returns a response depending on the url and type of handler.   
+* Note: we only need the specify the "root" directory for StaticHandler locations
+You can see examples in the conf/my_config file.    
+ 
+The config parser instantiates a specific request handler for a specific path. Session determines what the path is, using an internal mapping to decide what type of request handler we should use. There are three types of request handler classes: static, echo, and error. Each one inherits from the "request_handler" base class. They each override the `handle_request` method, which returns a response depending on the url and type of handler.    
 * Static request handler: serve static files to the user depending on the directory they are trying to access.   
 * Echo request handler: return a copy of the request back to the user.   
 * Error handler: return a 404 error to the user, signaling that the server could not find the resource that they were searching for.   
@@ -57,9 +66,13 @@ To add a new request handler class:
 
 # Extra Notes
 ### Logging Notes
+– The log outputs are written to "webserver_*.log" in the `powell-cat` directory
 - When adding new source files, make sure to use `#include <boost/log/trivial.hpp>`
 - For each executable in `CMakeLists.txt`, make sure to include `Boost::log_setup` and `Boost::log` in `target_link_libraries`
 
-
+### References
+– https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/ref/boost__beast__http__request.html
+– https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/ref/boost__beast__http__response.html
+– https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/ref/boost__beast__http__parser.html
 
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# NOTE: This shell script takes an extra parameter – 
+#       the name of the webserver executable
 
 #############
 # Constants #
