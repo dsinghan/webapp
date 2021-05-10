@@ -25,7 +25,7 @@ Step 6: Run the server. But first, go back to the `powell-cat` directory.
 # Source Code Explanation
 We create a new `server` object when we initialize our application. This allows us to accept requests and wraps the rest of our application logic.  
 
-The server accepts a config file in the format of an Nginx config file. It declares a config_parser object, which extracts the details from the config file when initializing the server. We use the "conf/my_config" file when starting our server. It contains `locations` server parameters, which redirect users to certain directories based on their path (see below). The config parser decides which request handler 
+The server accepts a config file in the format of an Nginx config file. It declares a config_parser object, which extracts the details from the config file when initializing the server. We use the "conf/my_config" file when starting our server. It contains `locations` server parameters, which redirect users to certain directories based on their path (see below). The config parser decides which request handler we should use.
 
 The server instantiates a new instance of the `session` class. The session handles our requests, determines which 
 
