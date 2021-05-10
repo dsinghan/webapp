@@ -3,9 +3,6 @@
 
 #include "request_handler.h"
 
-namespace http {
-namespace server {
-
 class error_handler : public request_handler 
 {
 public:
@@ -14,8 +11,5 @@ public:
     boost::beast::http::response<boost::beast::http::string_body> handle_request(const boost::beast::http::request<boost::beast::http::string_body>& request);
 
 };
-
-} // namespace server
-} // namespace http
 
 #endif

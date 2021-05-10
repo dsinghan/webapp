@@ -325,7 +325,7 @@ request_handler * NginxConfigParser::create_handler(std::string handler_name, st
   } else if (handler_name == "EchoHandler") {
     return new echo_request_handler(handler_location, handler_config);
   } else if (handler_name == "ErrorHandler") {
-    return new http::server::error_handler(handler_location, handler_config);
+    return new error_handler(handler_location, handler_config);
   } else {
     return nullptr;
   }

@@ -1,3 +1,5 @@
+# Format last updated 2021-05-05
+
 port 8080;
 
 location "/echo" EchoHandler {
@@ -5,9 +7,12 @@ location "/echo" EchoHandler {
 }
 
 location "/static1" StaticHandler {
-  root "./static/static1";  # Should support relative path
+  root "../static/static1";  # Should support relative path
 }
 
 location "/static2" StaticHandler {
-  root "./static/static2";
+  root "../static/static2";
 }
+
+location "/" ErrorHandler {
+} 

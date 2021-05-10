@@ -9,10 +9,6 @@
 #include "error_handler.h"
 #include "config_parser.h"
 
-
-namespace http {
-namespace server {
-
 error_handler::error_handler(std::string handler_location, const NginxConfig & handler_config)
   : request_handler(handler_location, handler_config)
 {}
@@ -26,7 +22,3 @@ boost::beast::http::response<boost::beast::http::string_body> error_handler::han
     res.prepare_payload();
     return res;
 }
-
-
-} /// namespace server
-} /// namespace http
