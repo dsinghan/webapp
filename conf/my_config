@@ -14,5 +14,10 @@ location "/static2" StaticHandler {
   root "./static/static2";
 }
 
+location "/washington" ProxyHandler {
+  host "www.washington.edu";
+  port 80;
+}
+
 location "/" ErrorHandler {
-} 
+}

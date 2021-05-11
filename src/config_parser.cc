@@ -22,6 +22,7 @@
 #include "config_parser.h"
 #include "echo_request_handler.h"
 #include "error_handler.h"
+#include "proxy_request_handler.h"
 #include "request_handler.h"
 #include "static_request_handler.h"
 
@@ -360,7 +361,9 @@ request_handler * NginxConfigParser::create_handler(std::string handler_name, st
     return new echo_request_handler(handler_location, handler_config);
   } else if (handler_name == "ErrorHandler") {
     return new error_handler(handler_location, handler_config);
-  } else {
+  } else if (handler_name == "ProxyHandler") {
+    return new proxy_request_handler(handler_location, handler_config);
+  } else {  
     return nullptr;
   }
 }

@@ -11,3 +11,8 @@ location "/static1" StaticHandler {
 location "/static2" StaticHandler {
   root "./static/static2";
 }
+
+location "/ucla" ProxyHandler {
+  host "www.ucla.edu";
+  port 80;
+}

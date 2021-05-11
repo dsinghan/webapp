@@ -20,7 +20,7 @@ class sessionTest : public ::testing::Test {
 //Test a good handle_read input
 TEST_F(sessionTest, testGetLocation) {
 
-    EXPECT_EQ(locations.size(),3);
+    EXPECT_EQ(locations.size(),4);
 
 }
 
