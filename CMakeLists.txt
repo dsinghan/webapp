@@ -63,9 +63,12 @@ target_link_libraries(echo_request_handler
     Boost::log_setup
     Boost::log)
 
+add_library(http_client src/http_client.cc)
+
 add_library(proxy_request_handler src/proxy_request_handler.cc)
 target_link_libraries(proxy_request_handler
     config_parser
+    http_client
     Boost::system
     Boost::log_setup
     Boost::log)
@@ -152,7 +155,7 @@ add_executable(error_handler_test tests/error_handler_test.cc)
 target_link_libraries(error_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler request_handler gtest_main Boost::log_setup Boost::log)
 
 add_executable(proxy_request_handler_test tests/proxy_request_handler_test.cc)
-target_link_libraries(proxy_request_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler request_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(proxy_request_handler_test http_client config_parser echo_request_handler proxy_request_handler static_request_handler error_handler request_handler gtest_main Boost::log_setup Boost::log)
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)

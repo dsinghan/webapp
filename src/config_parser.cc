@@ -362,7 +362,8 @@ request_handler * NginxConfigParser::create_handler(std::string handler_name, st
   } else if (handler_name == "ErrorHandler") {
     return new error_handler(handler_location, handler_config);
   } else if (handler_name == "ProxyHandler") {
-    return new proxy_request_handler(handler_location, handler_config);
+    http_client http;
+    return new proxy_request_handler(handler_location, handler_config, http);
   } else {  
     return nullptr;
   }
