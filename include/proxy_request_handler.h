@@ -17,14 +17,13 @@ public:
   explicit proxy_request_handler(std::string handler_location, const NginxConfig & handler_config, http_client http);
   /// Handle a request and produce a reply.
   http::response<http::string_body> handle_request(const http::request<http::string_body>& request);
+    /// Formulate a proper HTTP request to the website
+    std::string form_URI(const http::request<http::string_body>& request);
 
 private:
   /// The url of the website to send a request to
   std::string host_name_;
   http_client http_;
-
-    /// Formulate a proper HTTP request to the website
-    std::string form_URI(const http::request<http::string_body>& request);
 
     static bool get_new_request(
         http::response<http::string_body>, std::string& new_host, std::string& new_path);

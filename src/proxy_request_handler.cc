@@ -17,7 +17,8 @@ proxy_request_handler::proxy_request_handler(
     host_name_ =
         NginxConfigParser::parse_string(host_config_statement->tokens_[1]);
     
-    NginxConfigStatement * port_config_statement = NginxConfigParser::find_statement("port", &handler_config);
+    NginxConfigStatement * port_config_statement =
+        NginxConfigParser::find_statement("port", &handler_config);
     host_port_ = NginxConfigParser::parse_string(port_config_statement->tokens_[1]);
 }
 
@@ -30,7 +31,8 @@ proxy_request_handler::proxy_request_handler(
     host_name_ =
         NginxConfigParser::parse_string(host_config_statement->tokens_[1]);
 
-    NginxConfigStatement * port_config_statement = NginxConfigParser::find_statement("port", &handler_config);
+    NginxConfigStatement * port_config_statement =
+        NginxConfigParser::find_statement("port", &handler_config);
     host_port_ = NginxConfigParser::parse_string(port_config_statement->tokens_[1]);
 }
 
@@ -39,17 +41,34 @@ http::response<http::string_body> proxy_request_handler::handle_request(
 {
     std::string req_URI = form_URI(request);
     BOOST_LOG_TRIVIAL(info) << "Proxy URI: " << req_URI;
+    // Send the initial request
     auto response = http_.send_request(req_URI, host_name_, host_port_);
 
-    BOOST_LOG_TRIVIAL(debug) << "Response is: " << response.result();
-    while (300<=static_cast<unsigned>(response.result())<=308) {
+    // Keep track of the status code (200 OK, 404 not found, etc.)
+    // In case we need to submit another request for a redirect
+    unsigned int code = static_cast<unsigned>(response.result());
+    BOOST_LOG_TRIVIAL(debug) << "Response is: " << code;
+
+    int num_redirects = 0;
+    while (300 <= code && code <= 308) {
+        if (num_redirects >= 20){ // 20 is the standard redirect limit from chrome
+            response.version(11);
+            response.result(http::status::not_found);
+            response.body() = "404 Resource Not Found";
+            response.prepare_payload();
+            BOOST_LOG_TRIVIAL(info) << "Too many redirects, returning 404";
+            return response;
+        }
+        num_redirects++;
         std::string new_host;
         std::string new_path;
-        bool success = get_new_request(response, new_host, new_path);
-        if (!success) return response;
+        get_new_request(response, new_host, new_path);
         BOOST_LOG_TRIVIAL(debug) << "300 redirect | Host: " << new_host
                                  << " | Path: " << new_path;
+        // Send another request for the redirect target
         response = http_.send_request(new_path, new_host, host_port_);
+        code = static_cast<unsigned>(response.result());
+        BOOST_LOG_TRIVIAL(debug) << "Response is: " << code;
     }
     return response;
 }

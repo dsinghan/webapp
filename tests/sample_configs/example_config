@@ -19,5 +19,10 @@ location "/ucla" ProxyHandler {
   port 80;
 }
 
+location "/washington" ProxyHandler {
+    host "washington.edu";
+    port 80;
+}
+
 location "/" ErrorHandler {
 }
