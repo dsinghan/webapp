@@ -15,7 +15,8 @@ class session
 public:
   session(
     boost::asio::io_service& io_service,
-    std::map<std::string, request_handler*> locations
+    std::map<std::string, request_handler*> locations,
+    std::map<std::pair<std::string, int>, int> * request_results
   );
 
   //returns the server socket.
@@ -41,6 +42,7 @@ public:
   char data_[max_length];
 
   std::map<std::string, request_handler*> locations_;
+  std::map<std::pair<std::string, int>, int> * request_results_; // Reference member so server's map is updated by all sessions
 
   boost::beast::http::response<boost::beast::http::string_body> response_;
 

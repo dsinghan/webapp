@@ -26,3 +26,7 @@ location "/example" ProxyHandler {
 
 location "/" ErrorHandler {
 }
+
+location "/status" StatusHandler {
+
+}

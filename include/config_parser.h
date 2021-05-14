@@ -31,7 +31,7 @@ class NginxConfig {
 // The driver that parses a config file and generates an NginxConfig.
 class NginxConfigParser {
  public:
-  NginxConfigParser() {}
+  NginxConfigParser();
 
   // Take a opened config file or file name (respectively) and store the
   // parsed config in the provided NginxConfig out-param.  Returns true
@@ -52,6 +52,8 @@ class NginxConfigParser {
   static NginxConfigStatement * find_statement(std::string keyword, const NginxConfig* config);
 
   static std::string parse_string(std::string raw_location);
+
+  std::map<std::pair<std::string, int>, int> * get_request_results();
 
  private:
   enum TokenType {
@@ -79,7 +81,12 @@ class NginxConfigParser {
 
   request_handler * create_handler(std::string handler_name, std::string handler_location, const NginxConfig & handler_config);
 
+  std::map<std::string, std::vector<std::string> > get_handlers_url_map(NginxConfig * config);
+  std::map<std::string, std::vector<std::string> > handlers_url_map_;
+
   std::string remove_trailing_slashes(const std::string & given_string);
+
+  std::map<std::pair<std::string, int>, int> * request_results_;
 };
 
 #endif // CONFIG_PARSER_H

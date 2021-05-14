@@ -53,8 +53,10 @@ int main(int argc, char* argv[])
 
     std::map<std::string, request_handler*> locations = config_parser.get_locations(&config);
 
+    std::map<std::pair<std::string, int>, int> * request_results = config_parser.get_request_results();
+
     BOOST_LOG_TRIVIAL(info) << "Starting server with " << locations.size() << " locations on port " << port;
-    server s(io_service, port, locations);
+    server s(io_service, port, locations, request_results);
     io_service.run();
   }
   catch (std::exception& e)

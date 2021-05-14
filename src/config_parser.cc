@@ -25,6 +25,7 @@
 #include "proxy_request_handler.h"
 #include "request_handler.h"
 #include "static_request_handler.h"
+#include "status_request_handler.h"
 
 
 std::string NginxConfigStatement::ToString(int depth) {
@@ -59,6 +60,10 @@ std::string NginxConfig::ToString(int depth) {
     serialized_config.append(statement->ToString(depth));
   }
   return serialized_config;
+}
+
+NginxConfigParser::NginxConfigParser() {
+  request_results_ = new std::map<std::pair<std::string, int>, int>;
 }
 
 bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
@@ -170,6 +175,8 @@ int NginxConfigParser::extract_port(NginxConfig * config) {
 }
 
 std::map<std::string, request_handler*> NginxConfigParser::get_locations(NginxConfig * config) {
+  handlers_url_map_ = get_handlers_url_map(config);
+
   std::map<std::string, request_handler*> locations;
 
   for (int i = 0; i < config->statements_.size(); i++) {
@@ -364,9 +371,39 @@ request_handler * NginxConfigParser::create_handler(std::string handler_name, st
   } else if (handler_name == "ProxyHandler") {
     http_client http;
     return new proxy_request_handler(handler_location, handler_config, http);
-  } else {  
+  } else if (handler_name == "StatusHandler") {
+    status_request_handler * ret = new status_request_handler(handler_location, handler_config);
+    ret->set_request_results(request_results_);
+    ret->set_handlers_url_map(handlers_url_map_);
+    return ret;
+  } else {
     return nullptr;
   }
+}
+
+std::map<std::string, std::vector<std::string> > NginxConfigParser::get_handlers_url_map(NginxConfig * config) {
+  std::map<std::string, std::vector<std::string> > handlers;
+
+  for (int i = 0; i < config->statements_.size(); i++) {
+    NginxConfigStatement * cur_statement = config->statements_[i].get();
+    if (cur_statement->tokens_[0] != "location") {
+      continue;
+    }
+
+    std::string handler_location = remove_trailing_slashes(parse_string(cur_statement->tokens_[1]));
+    std::string handler_name = cur_statement->tokens_[2];
+    NginxConfig handler_config = *(cur_statement->child_block_.get());
+
+    request_handler * handler = create_handler(handler_name, handler_location, handler_config);
+    if (handler_location != "" && handler != nullptr) {
+      handlers[handler_name].push_back(handler_location);
+      delete handler;
+    } else {
+      BOOST_LOG_TRIVIAL(warning) << "Ignoring handler " << handler_name << " for location " << handler_location;
+    }
+  }
+
+  return handlers;
 }
 
 std::string NginxConfigParser::remove_trailing_slashes(const std::string & given_string) {
@@ -383,4 +420,8 @@ std::string NginxConfigParser::remove_trailing_slashes(const std::string & given
     ret.clear();  // str is all whitespace
 
   return ret;
+}
+
+std::map<std::pair<std::string, int>, int> * NginxConfigParser::get_request_results() {
+  return request_results_;
 }

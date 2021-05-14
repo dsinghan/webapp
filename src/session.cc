@@ -8,8 +8,9 @@
 
 session::session(
   boost::asio::io_service& io_service,
-  std::map<std::string, request_handler*> locations)
-  : socket_(io_service), locations_(locations) {}
+  std::map<std::string, request_handler*> locations,
+  std::map<std::pair<std::string, int>, int> * request_results)
+  : socket_(io_service), locations_(locations), request_results_(request_results) {}
 
 boost::asio::ip::tcp::socket& session::socket()
 {
@@ -119,7 +120,11 @@ int session::handle_read(const boost::system::error_code& error,
 
     BOOST_LOG_TRIVIAL(info) << "Handling request with path: " << path;
     response_ = selected_request_handler->handle_request(request_);
-  
+
+    // TODO: Is this the correct path?
+    std::string url = std::string(request_.target());
+    (*request_results_)[std::make_pair(url, response_.result_int())]++;
+    BOOST_LOG_TRIVIAL(debug) << "Updated " << url << ", " << response_.result_int() << ". It's now: " << (*request_results_)[std::make_pair(url, response_.result_int())];
   }
 
   // Write response to client.

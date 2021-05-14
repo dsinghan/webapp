@@ -19,7 +19,10 @@ protected:
 
 class MockSession : public session {
     public:
-    MockSession(boost::asio::io_service& io_service, std::map<std::string, request_handler*> locations) : session(io_service, locations) {}
+    MockSession(
+        boost::asio::io_service& io_service,
+        std::map<std::string, request_handler*> locations,
+        std::map<std::pair<std::string, int>, int> * request_results) : session(io_service, locations, request_results) {}
     MOCK_METHOD0(start, void());
 };
 
@@ -29,7 +32,8 @@ TEST_F(ServerTest, BasicServer) {
     short port = 8080;
     server * s = nullptr;
     std::map<std::string, request_handler*> locations;
-    s = new server(io_service, port, locations);
+    std::map<std::pair<std::string, int>, int> * request_results = config_parser.get_request_results();
+    s = new server(io_service, port, locations, request_results);
 
     EXPECT_TRUE(s != nullptr);
 
@@ -43,9 +47,10 @@ TEST_F(ServerTest, ServerHandleAccept) {
     boost::asio::io_service io_service;
     int port = config_parser.extract_port(&config);
     std::map<std::string, request_handler*> locations = config_parser.get_locations(&config);
-    server * s = new server(io_service, port, locations);
+    std::map<std::pair<std::string, int>, int> * request_results = config_parser.get_request_results();
+    server * s = new server(io_service, port, locations, request_results);
 
-    session * curr_sess = new session(io_service, locations);
+    session * curr_sess = new session(io_service, locations, request_results);
     boost::system::error_code error;
     int ret = s->handle_accept(curr_sess,error);
 
@@ -59,9 +64,10 @@ TEST_F(ServerTest, ServerHandleAcceptError) {
     boost::asio::io_service io_service;
     int port = config_parser.extract_port(&config);
     std::map<std::string, request_handler*> locations = config_parser.get_locations(&config);
-    server * s = new server(io_service, port, locations);
+    std::map<std::pair<std::string, int>, int> * request_results = config_parser.get_request_results();;
+    server * s = new server(io_service, port, locations, request_results);
 
-    session * curr_sess = new session(io_service, locations);
+    session * curr_sess = new session(io_service, locations, request_results);
     boost::system::error_code error = boost::system::errc::make_error_code(boost::system::errc::not_supported);
     int ret = s->handle_accept(curr_sess,error);
 

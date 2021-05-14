@@ -13,7 +13,8 @@ class sessionTest : public ::testing::Test {
     NginxConfig config;
     bool value = parser.Parse("sample_configs/sessionConfig", &config);
     std::map<std::string, request_handler*> locations = parser.get_locations(&config);
-    session * mySession = new session(io_service,locations);
+    std::map<std::pair<std::string, int>, int> * request_results;
+    session * mySession = new session(io_service, locations, request_results);
     bool success;
 };
 
