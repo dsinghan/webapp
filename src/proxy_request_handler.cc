@@ -62,9 +62,14 @@ http::response<http::string_body> proxy_request_handler::handle_request(
         num_redirects++;
         std::string new_host;
         std::string new_path;
-        get_new_request(response, new_host, new_path);
+	std::string protocol;
+        get_new_request(response, new_host, new_path, protocol);
         BOOST_LOG_TRIVIAL(debug) << "300 redirect | Host: " << new_host
                                  << " | Path: " << new_path;
+	if(protocol == "https"){
+	  BOOST_LOG_TRIVIAL(debug) << "Received https redirect, returning redirect response";
+	  return response;
+	}
         // Send another request for the redirect target
         response = http_.send_request(new_path, new_host, host_port_);
         code = static_cast<unsigned>(response.result());
@@ -75,11 +80,17 @@ http::response<http::string_body> proxy_request_handler::handle_request(
 
 
 bool proxy_request_handler::get_new_request(
-    http::response<http::string_body> response, std::string& new_host, std::string& new_path) {
+    http::response<http::string_body> response, std::string& new_host, std::string& new_path, std::string& protocol) {
     bool success = false;
     std::string location = std::string(response["Location"]);
+
+    //remove the http:// part of the request if it exists
+    if (location.find("://") != std::string::npos) {
+	protocol = location.substr(0, location.find("://"));
+	location.erase(0, location.find("://") + 3);
+    }
     
-    if (location.find("://") != std::string::npos) location.erase(0, location.find("://") + 3);
+    //split host to location before '/' if one exists
     if (location.find("/") == std::string::npos) {
         new_host = location;
         new_path = "/";
@@ -93,6 +104,7 @@ bool proxy_request_handler::get_new_request(
 }
 std::string proxy_request_handler::form_URI(const http::request<http::string_body>& request) {
     std::string URI_to_req;
+    //Take the intial request to find the correct uri to send the request to by removing the current server's path
     bool success = url_decode(std::string(request.target()), URI_to_req);
     if (!success) return "/";
 

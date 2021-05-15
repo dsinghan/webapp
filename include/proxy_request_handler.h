@@ -26,7 +26,7 @@ private:
   http_client http_;
 
     static bool get_new_request(
-        http::response<http::string_body>, std::string& new_host, std::string& new_path);
+        http::response<http::string_body>, std::string& new_host, std::string& new_path, std::string& protocol);
 
   /// The port number to issue requests to
     std::string host_port_;

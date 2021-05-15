@@ -19,5 +19,10 @@ location "/washington" ProxyHandler {
   port 80;
 }
 
+location "/example" ProxyHandler {
+  host "www.example.com";
+  port 80;
+}
+
 location "/" ErrorHandler {
 }

@@ -37,7 +37,7 @@ public:
   int handle_write(const boost::system::error_code& error);
 
   boost::asio::ip::tcp::socket socket_;
-  enum { max_length = 1024 };
+  enum { max_length = 8192 };
   char data_[max_length];
 
   std::map<std::string, request_handler*> locations_;

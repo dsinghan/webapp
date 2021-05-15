@@ -10,8 +10,10 @@ TMP_DIR=$(mktemp -d -t TEST-XXXXXXXXXX)
 
 EXECUTABLE="$1"
 CONFIG_FILE="$TMP_DIR/config.txt"
+CONFIG_FILE_BACKEND="$TMP_DIR/config_backend.txt"
 LOCAL_HOST="127.0.0.1"
 PORT="8080"
+PORT_BACKEND="8081"
 
 ECHO_EXPECTED_FILE="$TMP_DIR/echo_expected.txt"
 ECHO_OUTPUT_FILE="$TMP_DIR/echo_output.txt"
@@ -19,7 +21,8 @@ STATIC_EXPECTED_FILE="$TMP_DIR/static_expected.txt"
 STATIC_OUTPUT_FILE="$TMP_DIR/static_output.txt"
 ERROR_EXPECTED_FILE="$TMP_DIR/error_expected.txt"
 ERROR_OUTPUT_FILE="$TMP_DIR/error_output.txt"
-
+PROXY_EXPECTED_FILE="$TMP_DIR/proxy_expected.txt"
+PROXY_OUTPUT_FILE="$TMP_DIR/proxy_output.txt"
 
 #########
 # Setup #
@@ -31,11 +34,24 @@ port $PORT;
 location "/echo" EchoHandler { }
 location "/static" StaticHandler { root "./sample_configs"; }
 location "/" ErrorHandler { }
+location "/proxy" ProxyHandler { host "$LOCAL_HOST"; port "$PORT_BACKEND";}
+EOF
+
+cat > "$CONFIG_FILE_BACKEND" << EOF
+port $PORT_BACKEND;
+location "/echo" EchoHandler { }
+location "/static" StaticHandler { root "./sample_configs"; }
+location "/" ErrorHandler { }
 EOF
 
 # Begin Server in Background
 "$EXECUTABLE" "$CONFIG_FILE" > /dev/null 2>&1 &
 SERVER_PID=$!
+sleep 1  # A short delay to allow time for the server to start
+
+# Begin Backend Server in Background
+"$EXECUTABLE" "$CONFIG_FILE_BACKEND" > /dev/null 2>&1 &
+SERVER_PID_BACKEND=$!
 sleep 1  # A short delay to allow time for the server to start
 
 # Generate Echo Expected File
@@ -53,6 +69,8 @@ echo -n "};" > "$STATIC_EXPECTED_FILE"
 # Generate Error Expected File
 echo -n "404 Not Found" > "$ERROR_EXPECTED_FILE"
 
+# Generate Proxy Expected File
+echo -n "};" > "$PROXY_EXPECTED_FILE"
 
 ################
 # Perform Test #
@@ -84,13 +102,19 @@ ERROR_CURL_RESULT=$?
 diff -N "$ERROR_EXPECTED_FILE" "$ERROR_OUTPUT_FILE"
 ERROR_DIFF_RESULT=$?
 
+# Proxy Test
+curl -s -S -o "$PROXY_OUTPUT_FILE" "$LOCAL_HOST":"$PORT"/proxy/static/bad_transition1
+PROXY_CURL_RESULT=$?
+
+diff -N "$PROXY_EXPECTED_FILE" "$PROXY_OUTPUT_FILE"
+PROXY_DIFF_RESULT=$?
 
 ###########
 # Cleanup #
 ###########
 rm -rf "$TMP_DIR"
 kill $SERVER_PID
-
+kill $SERVER_PID_BACKEND
 
 ################
 # Test Results #
@@ -110,9 +134,13 @@ STATIC_TEST_RESULT=$?
 [ $ERROR_CURL_RESULT -eq 0 ] && [ $ERROR_DIFF_RESULT -eq 0 ]
 ERROR_TEST_RESULT=$?
 
+[ $PROXY_CURL_RESULT -eq 0 ] && [ $PROXY_DIFF_RESULT -eq 0 ]
+PROXY_TEST_RESULT=$?
+
 [ $ECHO_TEST_RESULT -eq 0 ] || echo "Echo Test Failed"
 [ $STATIC_TEST_RESULT -eq 0 ] || echo "Static Test Failed"
 [ $ERROR_TEST_RESULT -eq 0 ] || echo "Error Test Failed"
-[ $ECHO_TEST_RESULT -eq 0 ] && [ $STATIC_TEST_RESULT -eq 0 ] && [ $ERROR_TEST_RESULT -eq 0 ]
+[ $PROXY_TEST_RESULT -eq 0 ] || echo "Proxy Test Failed"
+[ $ECHO_TEST_RESULT -eq 0 ] && [ $STATIC_TEST_RESULT -eq 0 ] && [ $ERROR_TEST_RESULT -eq 0 ] && [ $PROXY_TEST_RESULT -eq 0 ]
 TEST_RESULT=$?
 exit $TEST_RESULT  # Exits with code 0 (success) or 1 (failure)
