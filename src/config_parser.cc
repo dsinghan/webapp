@@ -26,6 +26,7 @@
 #include "request_handler.h"
 #include "static_request_handler.h"
 #include "status_request_handler.h"
+#include "health_request_handler.h"
 
 
 std::string NginxConfigStatement::ToString(int depth) {
@@ -376,6 +377,8 @@ request_handler * NginxConfigParser::create_handler(std::string handler_name, st
     ret->set_request_results(request_results_);
     ret->set_handlers_url_map(handlers_url_map_);
     return ret;
+  } else if (handler_name == "HealthHandler") {
+    return new health_request_handler(handler_location, handler_config);
   } else {
     return nullptr;
   }

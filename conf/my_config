@@ -30,3 +30,7 @@ location "/" ErrorHandler {
 location "/status" StatusHandler {
 
 }
+
+location "/health" HealthHandler {
+
+}

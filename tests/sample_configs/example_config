@@ -26,3 +26,7 @@ location "/washington" ProxyHandler {
 
 location "/" ErrorHandler {
 }
+
+location "/health" HealthHandler {
+
+}
