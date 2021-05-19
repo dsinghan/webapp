@@ -34,3 +34,7 @@ location "/status" StatusHandler {
 location "/health" HealthHandler {
 
 }
+
+location "/sleep" BlockingHandler {
+  
+}
