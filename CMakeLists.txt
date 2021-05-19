@@ -52,6 +52,7 @@ target_link_libraries(config_parser
     request_handler
     echo_request_handler
     error_handler
+    blocking_request_handler
     static_request_handler
     proxy_request_handler
     status_request_handler
@@ -90,6 +91,10 @@ target_link_libraries(status_request_handler
 
 add_library(error_handler src/error_handler.cc)
 target_link_libraries(error_handler
+    config_parser)
+
+add_library(blocking_request_handler src/blocking_request_handler.cc)
+target_link_libraries(blocking_request_handler
     config_parser)
 
 add_library(health_request_handler src/health_request_handler.cc)
@@ -142,6 +147,7 @@ target_link_libraries(server_test
     echo_request_handler
     static_request_handler
     error_handler
+    blocking_request_handler
     proxy_request_handler
     gtest_main
     gmock_main)
@@ -162,10 +168,10 @@ target_link_libraries(utils_test
     Boost::log)
 
 add_executable(echo_request_handler_test tests/echo_request_handler_test.cc)
-target_link_libraries(echo_request_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler request_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(echo_request_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler blocking_request_handler request_handler gtest_main Boost::log_setup Boost::log)
 
 add_executable(static_request_handler_test tests/static_request_handler_test.cc)
-target_link_libraries(static_request_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler request_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(static_request_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler blocking_request_handler request_handler gtest_main Boost::log_setup Boost::log)
 
 add_executable(error_handler_test tests/error_handler_test.cc)
 target_link_libraries(error_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler request_handler gtest_main Boost::log_setup Boost::log)
@@ -208,5 +214,5 @@ add_test(
 # Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
 generate_coverage_report(
-    TARGETS webserver session server config_parser request_handler echo_request_handler static_request_handler proxy_request_handler status_request_handler error_handler health_request_handler utils
+    TARGETS webserver session server config_parser request_handler echo_request_handler static_request_handler proxy_request_handler status_request_handler error_handler blocking_request_handler health_request_handler utils
     TESTS config_parser_test session_test server_test request_handler_test echo_request_handler_test static_request_handler_test proxy_request_handler_test status_request_handler_test error_handler_test health_request_handler_test utils_test)
