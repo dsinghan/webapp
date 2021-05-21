@@ -40,7 +40,11 @@ boost::beast::http::response<boost::beast::http::string_body> echo_request_handl
   response.set("Content-Type", "text/plain");
   response.prepare_payload();
 
-  BOOST_LOG_TRIVIAL(info) << "Prepared Echo Response";
+  BOOST_LOG_TRIVIAL(info) << "Producing Echo Response";
 
   return response;
+}
+
+std::string echo_request_handler::get_name() {
+  return "Echo Request Handler";
 }

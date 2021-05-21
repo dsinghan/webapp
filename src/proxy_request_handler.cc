@@ -118,3 +118,7 @@ std::string proxy_request_handler::form_URI(const http::request<http::string_bod
     
     return URI_to_req;
 }
+
+std::string proxy_request_handler::get_name() {
+    return "Proxy Request Handler";
+}

@@ -22,3 +22,7 @@ boost::beast::http::response<boost::beast::http::string_body> error_handler::han
     res.prepare_payload();
     return res;
 }
+
+std::string error_handler::get_name() {
+  return "Error Handler";
+}

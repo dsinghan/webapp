@@ -15,6 +15,8 @@ public:
   /// Handle a request and produce a reply.
   boost::beast::http::response<boost::beast::http::string_body> handle_request(const boost::beast::http::request<boost::beast::http::string_body>& request);
 
+  std::string get_name();
+
 private:
   /// The directory containing the files to be served.
   std::string base_path_;

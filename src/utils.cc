@@ -28,12 +28,12 @@ void init_logging() {
   );
 
   logging::core::get()->set_filter(
-    logging::trivial::severity >= logging::trivial::debug
+    logging::trivial::severity >= logging::trivial::info
   );
 
   logging::add_common_attributes();
 
-  BOOST_LOG_TRIVIAL(info) << "Logging initialized";
+  BOOST_LOG_TRIVIAL(debug) << "Logging initialized";
 
 }
 

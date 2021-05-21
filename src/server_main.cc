@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 
     boost::asio::io_service io_service;
 
-    BOOST_LOG_TRIVIAL(info) << "Parsing config file: " << argv[1];
+    BOOST_LOG_TRIVIAL(debug) << "Parsing config file: " << argv[1];
     NginxConfigParser config_parser;
     NginxConfig config;
 

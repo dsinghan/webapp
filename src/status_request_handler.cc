@@ -23,7 +23,7 @@ boost::beast::http::response<boost::beast::http::string_body> status_request_han
       return response;
     }
 
-    BOOST_LOG_TRIVIAL(info) << "Producing Status Report of size" << request_results_->size();
+    BOOST_LOG_TRIVIAL(debug) << "Producing Status Report of size" << request_results_->size();
 
     boost::beast::http::response<boost::beast::http::string_body> response;
 
@@ -36,7 +36,7 @@ boost::beast::http::response<boost::beast::http::string_body> status_request_han
       std::string status_str = std::to_string(entry.first.second);
       std::string count_str = std::to_string(entry.second);
 
-      BOOST_LOG_TRIVIAL(info) << "New line: " << path << " " << status_str << " " << count_str;
+      BOOST_LOG_TRIVIAL(debug) << "New line: " << path << " " << status_str << " " << count_str;
 
       response.body() += path + ", " + status_str + ": " + count_str + "\n";
     }
@@ -58,7 +58,7 @@ boost::beast::http::response<boost::beast::http::string_body> status_request_han
     response.set("Content-Type", "text/plain");
     response.prepare_payload();
 
-    BOOST_LOG_TRIVIAL(info) << "Prepared Status Report";
+    BOOST_LOG_TRIVIAL(info) << "Producing Status Report";
     return response;
 }
 
@@ -68,4 +68,8 @@ void status_request_handler::set_request_results(std::map<std::pair<std::string,
 
 void status_request_handler::set_handlers_url_map(std::map<std::string, std::vector<std::string> > handlers_url_map) {
     handlers_url_map_ = handlers_url_map;
+}
+
+std::string status_request_handler::get_name() {
+  return "Status Request Handler";
 }

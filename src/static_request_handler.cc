@@ -28,7 +28,7 @@ boost::beast::http::response<boost::beast::http::string_body> static_request_han
     request_path += "index.html";
   }
 
-  BOOST_LOG_TRIVIAL(info) << "Request Path: " << request_path;
+  BOOST_LOG_TRIVIAL(debug) << "Request Path: " << request_path;
 
   // Determine the file extension.
     std::size_t last_slash_pos = request_path.find_last_of("/");
@@ -42,7 +42,7 @@ boost::beast::http::response<boost::beast::http::string_body> static_request_han
 
   // Append base path to request path and pen the file to send back.
   std::string full_path = base_path_ + request_path;
-  BOOST_LOG_TRIVIAL(info) << "Searching for file: " << full_path;
+  BOOST_LOG_TRIVIAL(debug) << "Searching for file: " << full_path;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is)
   {
@@ -62,7 +62,7 @@ boost::beast::http::response<boost::beast::http::string_body> static_request_han
   response_.set("Content-Type", mime_type(extension));
   response_.prepare_payload();
 
-  BOOST_LOG_TRIVIAL(info) << "Prepared Static Response";
+  BOOST_LOG_TRIVIAL(info) << "Producing Static Response";
 
   return response_;
 }
@@ -93,4 +93,8 @@ std::string static_request_handler::mime_type(std::string ext)
     // if(iequals(ext, ".svg"))  return "image/svg+xml";
     // if(iequals(ext, ".svgz")) return "image/svg+xml";
     return "application/text";
+}
+
+std::string static_request_handler::get_name() {
+  return "Static Request Handler";
 }

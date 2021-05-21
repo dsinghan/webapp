@@ -17,3 +17,7 @@ boost::beast::http::response<boost::beast::http::string_body> health_request_han
     res.prepare_payload();
     return res;
 }
+
+std::string health_request_handler::get_name() {
+  return "Health Request Handler";
+}

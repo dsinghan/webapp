@@ -29,6 +29,7 @@ public:
 
   /// Handle a request and produce a reply.
   virtual boost::beast::http::response<boost::beast::http::string_body> handle_request(const boost::beast::http::request<boost::beast::http::string_body>& request) = 0;
+  virtual std::string get_name() = 0;
 
   /// Perform URL-decoding on a string. Returns false if the encoding was invalid.
   static bool url_decode(const std::string& in, std::string& out);

@@ -17,6 +17,8 @@ public:
   explicit proxy_request_handler(std::string handler_location, const NginxConfig & handler_config, http_client http);
   /// Handle a request and produce a reply.
   http::response<http::string_body> handle_request(const http::request<http::string_body>& request);
+
+  std::string get_name();
     /// Formulate a proper HTTP request to the website
     std::string form_URI(const http::request<http::string_body>& request);
 

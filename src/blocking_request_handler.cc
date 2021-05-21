@@ -22,3 +22,7 @@ boost::beast::http::response<boost::beast::http::string_body> blocking_request_h
     res.prepare_payload();
     return res;
 }
+
+std::string blocking_request_handler::get_name() {
+  return "Blocking Request Handler";
+}
