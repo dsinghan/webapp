@@ -12,6 +12,7 @@
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/file.hpp>
+#include <boost/thread.hpp>
 
 #include "config_parser.h"
 #include "request_handler.h"
@@ -57,7 +58,21 @@ int main(int argc, char* argv[])
 
     BOOST_LOG_TRIVIAL(info) << "Starting server with " << locations.size() << " locations on port " << port;
     server s(io_service, port, locations, request_results);
-    io_service.run();
+
+    // Create threads
+    int NUM_THREADS = 8;
+    std::vector<boost::shared_ptr<boost::thread>> threads;
+    for (std::size_t i = 0; i < NUM_THREADS; ++i) {
+      // // Run io_service on each thread
+      boost::shared_ptr<boost::thread> thread(new boost::thread (
+        boost::bind(&boost::asio::io_service::run, &io_service)));
+      threads.push_back(thread);
+    }
+
+    // Stop threads
+    for (std::size_t i = 0; i < NUM_THREADS; i++) {
+      threads[i]->join();
+    }
   }
   catch (std::exception& e)
   {

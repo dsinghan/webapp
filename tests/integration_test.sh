@@ -27,7 +27,10 @@ STATUS_EXPECTED_FILE="$TMP_DIR/status_expected.txt"
 STATUS_OUTPUT_FILE="$TMP_DIR/status_output.txt"
 HEALTH_EXPECTED_FILE="$TMP_DIR/health_expected.txt"
 HEALTH_OUTPUT_FILE="$TMP_DIR/health_output.txt"
-
+BLOCK_EXPECTED_SLEEP_FILE="$TMP_DIR/block_sleep_expected.txt"  # sleep request
+BLOCK_OUTPUT_SLEEP_FILE="$TMP_DIR/block_sleep_output.txt"
+BLOCK_EXPECTED_LAND_FILE="$TMP_DIR/block_land_expected.txt" # echo request to test if server is still running after calling sleep
+BLOCK_OUTPUT_LAND_FILE="$TMP_DIR/block_land_output.txt"
 
 #########
 # Setup #
@@ -42,6 +45,7 @@ location "/" ErrorHandler { }
 location "/proxy" ProxyHandler { host "$LOCAL_HOST"; port "$PORT_BACKEND";}
 location "/status" StatusHandler { }
 location "/health" HealthHandler { }
+location "/sleep" BlockingHandler { }
 EOF
 
 cat > "$CONFIG_FILE_BACKEND" << EOF
@@ -90,6 +94,8 @@ Requests Received:
 /static/bad_transition1, 200: 1
 
 Request Handlers:
+BlockingHandler
+    /sleep
 EchoHandler
     /echo
 ErrorHandler
@@ -108,6 +114,14 @@ sed -i -e 's/^    /\t/' "$STATUS_EXPECTED_FILE"  # Replace four leading spaces w
 # Generate Health Expected File
 echo -n "OK" > "$HEALTH_EXPECTED_FILE"
 
+# Generate Blocking Expected File
+cat > "$BLOCK_EXPECTED_SLEEP_FILE" << EOF
+Successfully put server to sleep
+EOF
+truncate -s -1 $BLOCK_EXPECTED_SLEEP_FILE
+
+# Generate Error Expected File
+echo -n "404 Not Found" > "$BLOCK_EXPECTED_LAND_FILE"
 
 ################
 # Perform Test #
@@ -160,6 +174,29 @@ HEALTH_CURL_RESULT=$?
 diff -N "$HEALTH_EXPECTED_FILE" "$HEALTH_OUTPUT_FILE"
 HEALTH_DIFF_RESULT=$?
 
+# Blocking Test - send request to make server sleep.
+# Right after that, without waiting for sleep response, send a request (called "land" 
+#   in this program) to see if we can still access server
+SECONDS=0
+curl -s -S -o "$BLOCK_OUTPUT_SLEEP_FILE" "$LOCAL_HOST":"$PORT"/sleep & BLOCK_CURL_SLEEP_PID=$!
+curl -s -S -o "$BLOCK_OUTPUT_LAND_FILE" "$LOCAL_HOST":"$PORT"/ & BLOCK_CURL_LAND_PID=$!
+# Wait for land to complete
+wait $BLOCK_CURL_LAND_PID
+
+# SECONDS is a built-in variable in bash. 
+# See how long it took for LAND request to finish
+duration=$SECONDS
+wait $BLOCK_CURL_SLEEP_PID
+
+diff -N "$BLOCK_EXPECTED_SLEEP_FILE" "$BLOCK_OUTPUT_SLEEP_FILE"
+BLOCK_DIFF_SLEEP_RESULT=$?
+
+diff -N "$BLOCK_EXPECTED_LAND_FILE" "$BLOCK_OUTPUT_LAND_FILE"
+BLOCK_DIFF_LAND_RESULT=$?
+
+# See if the duration was less than 5 seconds. That would mean that another thread handled the land request
+[ $duration -lt 5 ]
+BLOCK_RESP_WITHIN_SLEEP_INTERVAL=$?
 
 ###########
 # Cleanup #
@@ -167,6 +204,7 @@ HEALTH_DIFF_RESULT=$?
 rm -rf "$TMP_DIR"
 kill $SERVER_PID
 kill $SERVER_PID_BACKEND
+
 
 ################
 # Test Results #
@@ -195,12 +233,16 @@ STATUS_TEST_RESULT=$?
 [ $HEALTH_CURL_RESULT -eq 0 ] && [ $HEALTH_DIFF_RESULT -eq 0 ]
 HEALTH_TEST_RESULT=$?
 
+[ $BLOCK_DIFF_SLEEP_RESULT -eq 0 ] && [ $BLOCK_DIFF_LAND_RESULT -eq 0 ] && [ $BLOCK_RESP_WITHIN_SLEEP_INTERVAL -eq 0 ]
+BLOCK_TEST_RESULT=$?
+
 [ $ECHO_TEST_RESULT -eq 0 ] || echo "Echo Test Failed"
 [ $STATIC_TEST_RESULT -eq 0 ] || echo "Static Test Failed"
 [ $ERROR_TEST_RESULT -eq 0 ] || echo "Error Test Failed"
 [ $PROXY_TEST_RESULT -eq 0 ] || echo "Proxy Test Failed"
 [ $STATUS_TEST_RESULT -eq 0 ] || echo "Status Test Failed"
 [ $HEALTH_TEST_RESULT -eq 0 ] || echo "HEALTH Test Failed"
-[ $ECHO_TEST_RESULT -eq 0 ] && [ $STATIC_TEST_RESULT -eq 0 ] && [ $ERROR_TEST_RESULT -eq 0 ] && [ $PROXY_TEST_RESULT -eq 0 ] && [ $STATUS_TEST_RESULT -eq 0 ] && [ $HEALTH_TEST_RESULT -eq 0 ]
+[ $BLOCK_TEST_RESULT -eq 0 ] || echo "Block Test Failed"
+[ $ECHO_TEST_RESULT -eq 0 ] && [ $STATIC_TEST_RESULT -eq 0 ] && [ $ERROR_TEST_RESULT -eq 0 ] && [ $PROXY_TEST_RESULT -eq 0 ] && [ $STATUS_TEST_RESULT -eq 0 ] && [ $HEALTH_TEST_RESULT -eq 0 ] && [ $BLOCK_TEST_RESULT -eq 0 ]
 TEST_RESULT=$?
 exit $TEST_RESULT  # Exits with code 0 (success) or 1 (failure)
