@@ -2,6 +2,8 @@
 
 port 80;
 
+threads 8;
+
 location "/echo" EchoHandler {
 
 }

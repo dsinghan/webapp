@@ -1,6 +1,8 @@
-# Format last updated 2021-05-05
+# Format last updated 2021-05-23
 
 port 8080;
+
+threads 8;
 
 location "/echo" EchoHandler {
 

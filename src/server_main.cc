@@ -59,18 +59,23 @@ int main(int argc, char* argv[])
     BOOST_LOG_TRIVIAL(info) << "Starting server with " << locations.size() << " locations on port " << port;
     server s(io_service, port, locations, request_results);
 
+    // Pull num threads from config file
+    NginxConfigStatement * num_threads_config_statement =
+        config_parser.find_statement("threads", &config);
+    int num_threads =
+        stoi(config_parser.parse_string(num_threads_config_statement->tokens_[1]));
+    
     // Create threads
-    int NUM_THREADS = 8;
     std::vector<boost::shared_ptr<boost::thread>> threads;
-    for (std::size_t i = 0; i < NUM_THREADS; ++i) {
-      // // Run io_service on each thread
+    for (std::size_t i = 0; i < num_threads; ++i) {
+      // Run io_service on each thread
       boost::shared_ptr<boost::thread> thread(new boost::thread (
         boost::bind(&boost::asio::io_service::run, &io_service)));
       threads.push_back(thread);
     }
 
     // Stop threads
-    for (std::size_t i = 0; i < NUM_THREADS; i++) {
+    for (std::size_t i = 0; i < num_threads; i++) {
       threads[i]->join();
     }
   }

@@ -14,6 +14,7 @@ CONFIG_FILE_BACKEND="$TMP_DIR/config_backend.txt"
 LOCAL_HOST="127.0.0.1"
 PORT="8080"
 PORT_BACKEND="8081"
+NUM_THREADS="8";
 
 ECHO_EXPECTED_FILE="$TMP_DIR/echo_expected.txt"
 ECHO_OUTPUT_FILE="$TMP_DIR/echo_output.txt"
@@ -39,6 +40,7 @@ BLOCK_OUTPUT_LAND_FILE="$TMP_DIR/block_land_output.txt"
 # Generate Config File
 cat > "$CONFIG_FILE" << EOF
 port $PORT;
+threads $NUM_THREADS;
 location "/echo" EchoHandler { }
 location "/static" StaticHandler { root "./sample_configs"; }
 location "/" ErrorHandler { }
@@ -50,6 +52,7 @@ EOF
 
 cat > "$CONFIG_FILE_BACKEND" << EOF
 port $PORT_BACKEND;
+threads $NUM_THREADS;
 location "/echo" EchoHandler { }
 location "/static" StaticHandler { root "./sample_configs"; }
 location "/" ErrorHandler { }
