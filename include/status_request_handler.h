@@ -18,7 +18,9 @@ public:
 
 private:
     std::map<std::pair<std::string, int>, int> * request_results_;
+    std::mutex request_results_lock_; 
     std::map<std::string, std::vector<std::string> > handlers_url_map_;
+    std::mutex handlers_url_map_lock_; 
 };
 
 #endif

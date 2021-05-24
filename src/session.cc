@@ -7,6 +7,8 @@
 
 #include "session.h"
 
+std::mutex session::request_results_lock_;
+
 session::session(
   boost::asio::io_service& io_service,
   std::map<std::string, request_handler*> locations,
@@ -125,7 +127,9 @@ int session::handle_read(const boost::system::error_code& error,
 
     // TODO: Is this the correct path?
     std::string url = std::string(request_.target());
+    request_results_lock_.lock();
     (*request_results_)[std::make_pair(url, response_.result_int())]++;
+    request_results_lock_.unlock();
     BOOST_LOG_TRIVIAL(debug) << "Updated " << url << ", " << response_.result_int() << ". It's now: " << (*request_results_)[std::make_pair(url, response_.result_int())];
   }
 

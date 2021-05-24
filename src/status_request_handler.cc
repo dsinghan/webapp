@@ -14,12 +14,14 @@ status_request_handler::status_request_handler(std::string handler_location, con
 
 boost::beast::http::response<boost::beast::http::string_body> status_request_handler::handle_request(const boost::beast::http::request<boost::beast::http::string_body>& request)
 {
+    request_results_lock_.lock();
     if (request_results_ == nullptr) {
       BOOST_LOG_TRIVIAL(warning) << "No Request Results Available";
       boost::beast::http::response<boost::beast::http::string_body> response;
       response.set("Content-Type", "text/plain");
       response.body() = "No Request Results Available\n";
       response.prepare_payload();
+      request_results_lock_.unlock();
       return response;
     }
 
@@ -40,10 +42,12 @@ boost::beast::http::response<boost::beast::http::string_body> status_request_han
 
       response.body() += path + ", " + status_str + ": " + count_str + "\n";
     }
+    request_results_lock_.unlock();
 
     response.body() += "\n";
 
     response.body() += "Request Handlers:\n";
+    handlers_url_map_lock_.lock();
     for (auto const & entry : handlers_url_map_) {
       std::string handler_name = entry.first;
       std::vector<std::string> handler_urls = entry.second;
@@ -53,6 +57,7 @@ boost::beast::http::response<boost::beast::http::string_body> status_request_han
         response.body() += "\t" + url + "\n";
       }
     }
+    handlers_url_map_lock_.unlock();
 
     // Prepare response headers and return response object.
     response.set("Content-Type", "text/plain");
@@ -63,11 +68,15 @@ boost::beast::http::response<boost::beast::http::string_body> status_request_han
 }
 
 void status_request_handler::set_request_results(std::map<std::pair<std::string, int>, int> * request_results) {
-    request_results_ = request_results;
+  request_results_lock_.lock();
+  request_results_ = request_results;
+  request_results_lock_.unlock();
 }
 
 void status_request_handler::set_handlers_url_map(std::map<std::string, std::vector<std::string> > handlers_url_map) {
+    handlers_url_map_lock_.lock();
     handlers_url_map_ = handlers_url_map;
+    handlers_url_map_lock_.unlock();
 }
 
 std::string status_request_handler::get_name() {

@@ -32,6 +32,8 @@ public:
   int handle_read(const boost::system::error_code& error,
       size_t bytes_transferred);
 
+  static std::mutex request_results_lock_; 
+
   //removes the trailing path of the URL request. For example /static1/index.html -> /static1
   std::string remove_path_extension(std::string path);
 
