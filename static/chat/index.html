@@ -1,0 +1,374 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Powell Cat Chat</title>
+  <meta name="description" content="Our first page">
+  <meta name="keywords" content="html tutorial template">
+  <style>
+    body {
+      background-color: #F4F4F4;
+      height: 100vh;
+      display: block;
+      margin: 0;
+    }
+    * {
+      font-family: "Proxima Nova", Verdana, sans-serif;
+    }
+    input {
+      width: 90%;
+      padding: 1rem 0.5rem;
+      border: 4px solid #E3E3E3;
+      border-radius: 20px;
+      padding-left: 1rem;
+      outline: none;
+      transition: border 0.2s ease-in-out;
+    }
+    input:focus {
+      border: 4px solid black;
+    }
+    .flex {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hide {
+      display: none;
+    }
+    .background {
+      width: 100%;
+      height: 100%;
+      background-color: rgba(220, 220, 220, 0.39);
+    }
+    .box {
+      background: #FFFFFF;
+      box-shadow: 0px 4px 50px rgba(161, 161, 161, 0.25);
+      border-radius: 50px;
+      border: 1px solid #E3E3E3;
+    }
+    .background-box {
+      position: absolute;
+      filter: brightness(95%);
+    }
+    @-moz-keyframes spinOne { 100% { -moz-transform: rotate(360deg); } }
+    @-webkit-keyframes spinOne { 100% { -webkit-transform: rotate(360deg); } }
+    @keyframes spinOne { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+
+    @-moz-keyframes spinTwo { 100% { -moz-transform: rotate(360deg); } }
+    @-webkit-keyframes spinTwo { 100% { -webkit-transform: rotate(360deg); } }
+    @keyframes spinTwo { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+    .background-box-1 {
+      width: 20rem;
+      height: 20rem;
+      top: 10%;
+      left: 10%;
+      position: absolute;
+      z-index: 0;
+
+      animation:spinOne 20s linear infinite;
+    }
+    .background-box-2 {
+      width: 10rem;
+      height: 10rem;
+      bottom: 10%;
+      left: 20%;
+      animation:spinTwo 13s linear infinite reverse;
+    }
+    .background-box-3 {
+      width: 13rem;
+      height: 13rem;
+      top: 10%;
+      right: 35%;
+      animation:spinTwo 10s linear infinite reverse;
+    }
+    .background-box-4 {
+      width: 17rem;
+      height: 17rem;
+      bottom: 10%;
+      right: 15%;
+      animation:spinOne 30s linear infinite;
+    }
+    .dim-cover {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0px;
+      top: 0px;
+      /*background-color: rgba(0,0,0,0.3);*/
+    }
+    .password-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+    .password-box {
+      width: 25rem;
+      height: 25rem;
+      flex-direction: column;
+    }
+    .password-box * {
+      width: 75%;
+      
+    }
+    .password-box h1 {
+      margin-bottom: 0;
+    }
+    .password-box #password-error {
+      color: red;
+      display: none;
+    }
+    .password-box input {
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+    }
+    .password-box button {
+      background-color: #364AFF; 
+      border: none;
+      border-radius: 20px;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-weight: bold;
+      cursor: pointer;
+      filter: brightness(100%);
+      transition: 0.2s ease-in-out;
+    }
+    .password-box button:hover {
+      filter: brightness(107%);
+    }
+    .password-box button:active {
+      filter: brightness(115%);
+    }
+    .chat-box {
+      position: absolute;
+      background: white;
+      box-shadow: 0px 4px 50px rgba(161, 161, 161, 0.25);
+      border-radius: 50px;
+      width: 90%;
+      height: 90%;
+      top: 5%;
+      left: 5%;
+      flex-direction: column;
+      z-index: 5;
+    }
+    .messages-container {
+      width: 100%;
+      flex: 1;
+      padding-top: 3rem;
+      padding-bottom: 0.5rem;
+      background-color: white;
+      border-top-left-radius: 50px;
+      border-top-right-radius: 50px;
+      overflow-x: auto;
+    }
+    .message-container {
+      width: 90%;
+      margin-left: 5%;
+      padding-bottom: 1rem;
+      color: black;
+    }
+    .message-container strong {
+      font-weight: bold;
+    }
+    .my-box-container {
+      width: 100%;
+      height: 6rem;
+      background-color: #F4F4F4;
+      border-bottom-left-radius: 50px;
+      border-bottom-right-radius: 50px;
+      box-shadow: 0px -4px 20px rgba(134, 134, 134, 0.25);
+    }
+    .my-box-container input {
+      width: 90%;
+    }
+  </style>
+  </head>
+<body>
+  <div class="background ">
+    <div class="box background-box background-box-1"> </div>
+    <div class="box background-box background-box-2"> </div>
+    <div class="box background-box background-box-3"> </div>
+    <div class="box background-box background-box-4"> </div>
+    <div class="dim-cover"> </div>
+    <div id="password-container" class="password-container flex">
+      <div class="box password-box flex">
+        <h1> Enter Password </h1>
+        <p>This is for UCLA students only. If you're from USC, please leave. Go Bruins! 😤 </p>
+        <p id="password-error">Wrong password! 😛</p>
+        <input id="username" placeholder="Create a username"/> 
+        <input id="password" type="password" placeholder="Enter the secret password"/> 
+        <button onclick="submitCredentials()">Submit</button>
+      </div>
+    </div>
+    <div id="chat-box" class="chat-box hide flex">
+      <div id="messages-container" class="messages-container">
+      </div>
+      <div class="my-box-container flex">
+        <input id="message-input" type="text" placeholder="Enter your message here!" />
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+<script>
+const credentials = {
+  username: "",
+  password: ""
+}
+let username = null;
+let password = null;
+const userDB = {}; // key: name, value: color
+let messageDB = null;
+const COLORS = [
+    // {name: "aqua", hex: "#00ffff"}, kinda hard to read
+    // black: "#000000", RESERVED FOR THE CURRENT USER
+    {name: "lime", hex: "#00ff00"},
+    {name: "red", hex: "#ff0000"},
+    {name: "blue", hex: "#0000ff"},
+    {name: "darkblue", hex: "#00008b"},
+    {name: "darkcyan", hex: "#008b8b"},
+    {name: "darkgrey", hex: "#a9a9a9"},
+    {name: "brown", hex: "#a52a2a"},
+    {name: "darkgreen", hex: "#006400"},
+    {name: "darkkhaki", hex: "#bdb76b"},
+    {name: "darkmagenta", hex: "#8b008b"},
+    {name: "darkolivegreen", hex: "#556b2f"},
+    {name: "darkorange", hex: "#ff8c00"},
+    {name: "darkorchid", hex: "#9932cc"},
+    {name: "darkred", hex: "#8b0000"},
+    {name: "darksalmon", hex: "#e9967a"},
+    {name: "darkviolet", hex: "#9400d3"},
+    {name: "fuchsia", hex: "#ff00ff"},
+    {name: "gold", hex: "#ffd700"},
+    {name: "green", hex: "#008000"},
+    {name: "indigo", hex: "#4b0082"},
+    {name: "khaki", hex: "#f0e68c"},
+    {name: "lightblue", hex: "#add8e6"},
+    {name: "lightgreen", hex: "#90ee90"},
+    {name: "lightgrey", hex: "#d3d3d3"},
+    {name: "lightpink", hex: "#ffb6c1"},
+    {name: "magenta", hex: "#ff00ff"},
+    {name: "maroon", hex: "#800000"},
+    {name: "navy", hex: "#000080"},
+    {name: "olive", hex: "#808000"},
+    {name: "orange", hex: "#ffa500"},
+    {name: "pink", hex: "#ffc0cb"},
+    {name: "purple", hex: "#800080"},
+    {name: "silver", hex: "#c0c0c0"},
+    
+]
+
+const USER_TO_COLOR = {}
+
+const RETRIEVE_MESSAGES_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages?maxRecords=1000&view=Grid%20view";
+const CREATE_MESSAGE_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages";
+
+async function submitCredentials() {
+  const _username = document.getElementById("username").value;
+  const _password = document.getElementById("password").value;
+
+  if (!_username || !_password) {
+    return;
+  }
+
+  credentials["username"] = _username;
+  credentials["password"] = _password;
+  // hide password page
+  document.getElementById("password-container").classList.add("hide");
+  // show chat page
+  document.getElementById("chat-box").classList.remove("hide");
+
+  // Get messages
+  await getMessages();
+
+  // Allow user to send messages
+  document.getElementById("message-input").addEventListener("keydown", function (event) {
+    if (event.keyCode === 13) {
+      const value = document.getElementById("message-input").value;
+      document.getElementById("message-input").value = "";
+      // Send the web request to backend with the message
+      fetch(CREATE_MESSAGE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer key29Zkqa0aGZBsIg"
+          },
+          body: JSON.stringify({
+            "records": [
+              {
+                "fields": {
+                  "Message": value,
+                  "Username": credentials["username"],
+                }
+              }
+            ]
+          })
+        })
+          .then(response => response.json())
+          .then(getMessages);
+    }
+  });
+}
+
+async function getMessages() {
+  console.log("Getting messages...");
+
+  // GET MESSAGES
+  const messagesReq = await fetch(RETRIEVE_MESSAGES_URL, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer key29Zkqa0aGZBsIg"
+      }
+    });
+  const messageResp = await messagesReq.json();
+
+  // Check if we have username data for each message
+  for (var i = 0; i < messageResp["records"].length; i++) {
+    const messageSender = messageResp["records"][i]["fields"]["Username"]
+    if (!(messageSender in USER_TO_COLOR)) {
+      // Assign user to color
+      USER_TO_COLOR[messageSender] = COLORS[0];
+      const lastUsedColor = Object.assign(COLORS[0]);
+      COLORS.shift();
+      COLORS.push(lastUsedColor);
+    }
+  }
+
+
+  // Create message on screen
+  const newMessageDB = messageResp["records"];
+
+  const msgContainer = document.getElementById("messages-container");
+  msgContainer.innerHTML = "";
+  // only add the new messages
+  for (var i = 0; i < newMessageDB.length; i++) {
+    let msgBox = document.createElement("div");
+    msgBox.classList.add("message-container");
+    let username = document.createElement("strong");
+    username.innerHTML = newMessageDB[i]["fields"]["Username"] + ": ";
+    const messageSender = newMessageDB[i]["fields"]["Username"];
+    if (messageSender === credentials["username"]) {
+      username.style.color = "black";
+    } else {
+      username.style.color = USER_TO_COLOR[messageSender]["hex"];
+    }
+    msgBox.appendChild(username);
+    let message = document.createElement("span");
+    message.innerHTML = newMessageDB[i]["fields"]["Message"];
+    msgBox.appendChild(message);
+    msgContainer.appendChild(msgBox);
+    // TODO: Check if url is in there!
+  }
+
+  // Scroll to bottom of messages container to see new messags
+  const messagesContainer = document.getElementById("messages-container");
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+  messageDB = newMessageDB;
+}
+
+</script>
