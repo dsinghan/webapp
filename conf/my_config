@@ -40,3 +40,7 @@ location "/health" HealthHandler {
 location "/sleep" BlockingHandler {
   
 }
+
+location "/chat" ChatHandler {
+  root "./static/chat";
+}

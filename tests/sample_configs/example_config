@@ -1,4 +1,4 @@
-# Format last updated 2021-05-23
+# Format last updated 2021-05-05
 
 port 8080;
 
@@ -16,17 +16,21 @@ location "/static2" StaticHandler {
   root "../static/static2";
 }
 
-location "/ucla" ProxyHandler {
-  host "www.ucla.edu";
+location "/washington" ProxyHandler {
+  host "www.washington.edu";
   port 80;
 }
 
-location "/washington" ProxyHandler {
-    host "washington.edu";
-    port 80;
+location "/example" ProxyHandler {
+  host "www.example.com";
+  port 80;
 }
 
 location "/" ErrorHandler {
+}
+
+location "/status" StatusHandler {
+
 }
 
 location "/health" HealthHandler {
@@ -35,4 +39,8 @@ location "/health" HealthHandler {
 
 location "/sleep" BlockingHandler {
   
+}
+
+location "/chat" ChatHandler {
+  root "../static/chat";
 }

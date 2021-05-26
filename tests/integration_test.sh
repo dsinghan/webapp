@@ -28,6 +28,7 @@ STATUS_EXPECTED_FILE="$TMP_DIR/status_expected.txt"
 STATUS_OUTPUT_FILE="$TMP_DIR/status_output.txt"
 HEALTH_EXPECTED_FILE="$TMP_DIR/health_expected.txt"
 HEALTH_OUTPUT_FILE="$TMP_DIR/health_output.txt"
+CHAT_OUTPUT_FILE="$TMP_DIR/chat_output.txt"
 BLOCK_EXPECTED_SLEEP_FILE="$TMP_DIR/block_sleep_expected.txt"  # sleep request
 BLOCK_OUTPUT_SLEEP_FILE="$TMP_DIR/block_sleep_output.txt"
 BLOCK_EXPECTED_LAND_FILE="$TMP_DIR/block_land_expected.txt" # echo request to test if server is still running after calling sleep
@@ -47,6 +48,7 @@ location "/" ErrorHandler { }
 location "/proxy" ProxyHandler { host "$LOCAL_HOST"; port "$PORT_BACKEND";}
 location "/status" StatusHandler { }
 location "/health" HealthHandler { }
+location "/chat" ChatHandler { root "../static/chat"; }
 location "/sleep" BlockingHandler { }
 EOF
 
@@ -99,6 +101,8 @@ Requests Received:
 Request Handlers:
 BlockingHandler
     /sleep
+ChatHandler
+    /chat
 EchoHandler
     /echo
 ErrorHandler
@@ -177,6 +181,13 @@ HEALTH_CURL_RESULT=$?
 diff -N "$HEALTH_EXPECTED_FILE" "$HEALTH_OUTPUT_FILE"
 HEALTH_DIFF_RESULT=$?
 
+# Chat Test
+curl -s -S -o "$CHAT_OUTPUT_FILE" "$LOCAL_HOST":"$PORT"/chat
+CHAT_CURL_RESULT=$?
+
+diff -N "../static/chat/index.html" "$CHAT_OUTPUT_FILE"
+CHAT_DIFF_RESULT=$?
+
 # Blocking Test - send request to make server sleep.
 # Right after that, without waiting for sleep response, send a request (called "land" 
 #   in this program) to see if we can still access server
@@ -236,6 +247,9 @@ STATUS_TEST_RESULT=$?
 [ $HEALTH_CURL_RESULT -eq 0 ] && [ $HEALTH_DIFF_RESULT -eq 0 ]
 HEALTH_TEST_RESULT=$?
 
+[ $CHAT_CURL_RESULT -eq 0 ] && [ $CHAT_DIFF_RESULT -eq 0 ]
+CHAT_TEST_RESULT=$?
+
 [ $BLOCK_DIFF_SLEEP_RESULT -eq 0 ] && [ $BLOCK_DIFF_LAND_RESULT -eq 0 ] && [ $BLOCK_RESP_WITHIN_SLEEP_INTERVAL -eq 0 ]
 BLOCK_TEST_RESULT=$?
 
@@ -245,7 +259,8 @@ BLOCK_TEST_RESULT=$?
 [ $PROXY_TEST_RESULT -eq 0 ] || echo "Proxy Test Failed"
 [ $STATUS_TEST_RESULT -eq 0 ] || echo "Status Test Failed"
 [ $HEALTH_TEST_RESULT -eq 0 ] || echo "HEALTH Test Failed"
+[ $CHAT_TEST_RESULT -eq 0 ] || echo "CHAT Test Failed"
 [ $BLOCK_TEST_RESULT -eq 0 ] || echo "Block Test Failed"
-[ $ECHO_TEST_RESULT -eq 0 ] && [ $STATIC_TEST_RESULT -eq 0 ] && [ $ERROR_TEST_RESULT -eq 0 ] && [ $PROXY_TEST_RESULT -eq 0 ] && [ $STATUS_TEST_RESULT -eq 0 ] && [ $HEALTH_TEST_RESULT -eq 0 ] && [ $BLOCK_TEST_RESULT -eq 0 ]
+[ $ECHO_TEST_RESULT -eq 0 ] && [ $STATIC_TEST_RESULT -eq 0 ] && [ $ERROR_TEST_RESULT -eq 0 ] && [ $PROXY_TEST_RESULT -eq 0 ] && [ $STATUS_TEST_RESULT -eq 0 ] && [ $HEALTH_TEST_RESULT -eq 0 ] && [ $CHAT_TEST_RESULT -eq 0 ] && [ $BLOCK_TEST_RESULT -eq 0 ]
 TEST_RESULT=$?
 exit $TEST_RESULT  # Exits with code 0 (success) or 1 (failure)
