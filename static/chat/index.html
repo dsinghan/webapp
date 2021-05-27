@@ -263,8 +263,14 @@ const COLORS = [
 
 const USER_TO_COLOR = {}
 
-const RETRIEVE_MESSAGES_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages?maxRecords=1000&view=Grid%20view";
+const RETRIEVE_MESSAGES_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages?maxRecords=1000&view=Grid%20view&sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc"
 const CREATE_MESSAGE_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages";
+
+const getMessagesReq = {
+  lastSent: null,
+  isSending: false,
+  interval: null
+}
 
 async function submitCredentials() {
   const _username = document.getElementById("username").value;
@@ -283,6 +289,9 @@ async function submitCredentials() {
 
   // Get messages
   await getMessages();
+
+  // Set interval to fetch messages every 3 seconds
+  getMessagesReq.interval = setInterval(getMessages, 1000);
 
   // Allow user to send messages
   document.getElementById("message-input").addEventListener("keydown", function (event) {
@@ -313,8 +322,34 @@ async function submitCredentials() {
   });
 }
 
+function parseUrl(str) {
+  // if(new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?").test(status_text)) {
+  //   return true;
+  // }
+  // return false;
+  var urlRE= new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?([^ ])+");
+  const match = str.match(urlRE);
+  if (match.length === 1 && match[0] === "") {
+    return null;
+  }
+  return match;
+}
+
 async function getMessages() {
-  console.log("Getting messages...");
+  const now = new Date();
+  // if we have previously sent a request, don't send a new one if it happened recently
+  if (getMessagesReq.lastSent) {
+    const timeSinceLastReq = (now.getTime() - getMessagesReq.lastSent) / 1000;
+    if (timeSinceLastReq < 1) {
+      return;
+    }
+  }
+  
+  if (getMessagesReq.isSending)
+    return; // we're already getting the messages!
+
+  getMessagesReq.lastSent  = now.getTime();
+  getMessagesReq.isSending = true; 
 
   // GET MESSAGES
   const messagesReq = await fetch(RETRIEVE_MESSAGES_URL, {
@@ -338,14 +373,18 @@ async function getMessages() {
     }
   }
 
+  // Decide if we should scroll to the bottom of the container
+  let shouldScrollToBottom = false;
+  const messagesContainer = document.getElementById("messages-container");
+  if( messagesContainer.scrollTop === Math.abs(messagesContainer.scrollHeight - messagesContainer.offsetHeight)) {
+    shouldScrollToBottom = true;
+  }
 
   // Create message on screen
   const newMessageDB = messageResp["records"];
-
   const msgContainer = document.getElementById("messages-container");
   msgContainer.innerHTML = "";
-  // only add the new messages
-  for (var i = 0; i < newMessageDB.length; i++) {
+  for (var i = newMessageDB.length - 1; i >= 0; i--) {
     let msgBox = document.createElement("div");
     msgBox.classList.add("message-container");
     let username = document.createElement("strong");
@@ -365,10 +404,12 @@ async function getMessages() {
   }
 
   // Scroll to bottom of messages container to see new messags
-  const messagesContainer = document.getElementById("messages-container");
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  if (shouldScrollToBottom) {
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
 
   messageDB = newMessageDB;
+  getMessagesReq.isSending = false; 
 }
 
 </script>
