@@ -263,7 +263,9 @@ const COLORS = [
 
 const USER_TO_COLOR = {}
 
+const SERVER = "http://34.83.179.31/check_password";
 const RETRIEVE_MESSAGES_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages?maxRecords=1000&view=Grid%20view&sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc"
+//const SERVER = "http://localhost:8080/check_password";
 const CREATE_MESSAGE_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages";
 
 const getMessagesReq = {
@@ -282,6 +284,14 @@ async function submitCredentials() {
 
   credentials["username"] = _username;
   credentials["password"] = _password;
+  isCorrect = await checkPassword(_password);
+  
+  //If the password is incorrect, return with an alert.
+  if (isCorrect == "False") {
+    return alert("Incorrect Password");
+  }
+
+
   // hide password page
   document.getElementById("password-container").classList.add("hide");
   // show chat page
@@ -333,6 +343,23 @@ function parseUrl(str) {
     return null;
   }
   return match;
+
+}
+
+async function checkPassword(password) {
+
+  let val = await fetch(SERVER, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain",
+            "security-scheme": password
+          }
+        })
+        .then(response => response.text())
+        .then(response => {return response});
+
+  console.log(val);
+  return val;
 }
 
 async function getMessages() {

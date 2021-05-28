@@ -57,6 +57,7 @@ target_link_libraries(config_parser
     proxy_request_handler
     status_request_handler
     health_request_handler
+    password_handler
     chat_request_handler)
 
 add_library(request_handler src/request_handler.cc)
@@ -92,6 +93,10 @@ target_link_libraries(status_request_handler
 
 add_library(error_handler src/error_handler.cc)
 target_link_libraries(error_handler
+    config_parser)
+
+add_library(password_handler src/password_handler.cc)
+target_link_libraries(password_handler
     config_parser)
 
 add_library(blocking_request_handler src/blocking_request_handler.cc)

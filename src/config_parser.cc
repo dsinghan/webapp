@@ -29,6 +29,7 @@
 #include "status_request_handler.h"
 #include "health_request_handler.h"
 #include "chat_request_handler.h"
+#include "password_handler.h"
 
 
 std::string NginxConfigStatement::ToString(int depth) {
@@ -385,6 +386,8 @@ request_handler * NginxConfigParser::create_handler(std::string handler_name, st
     return new blocking_request_handler(handler_location, handler_config);
   } else if (handler_name == "ChatHandler") {
     return new chat_request_handler(handler_location, handler_config);
+  } else if (handler_name == "PasswordHandler") {
+    return new password_handler(handler_location,handler_config);
   } else {
     return nullptr;
   }
