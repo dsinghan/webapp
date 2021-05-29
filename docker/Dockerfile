@@ -20,7 +20,7 @@ FROM ubuntu:latest as deploy
 COPY --from=builder /usr/src/project/build/bin/webserver .
 COPY --from=builder /usr/src/project/conf/my_config .
 COPY --from=builder /usr/src/project/static ./static
-COPY --from=builder /usr/src/password.txt .
+COPY --from=builder /usr/src/project/chat_password/password.txt ./chat_password
 
 RUN echo "HI" > ./hello.txt
 RUN ls -la .
