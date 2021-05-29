@@ -19,8 +19,8 @@ password_handler::password_handler(std::string handler_location, const NginxConf
     std::string path = "/password.txt";
     
     std::string full_path = base_path_ + path;
-    BOOST_LOG_TRIVIAL(debug) << "PATH: " << full_path;
-    BOOST_LOG_TRIVIAL(debug) << "Searching for file: " << full_path;
+    BOOST_LOG_TRIVIAL(info) << "PATH: " << full_path;
+    BOOST_LOG_TRIVIAL(info) << "Searching for file: " << full_path;
     std::ifstream inFile;
     inFile.open(full_path.c_str());
 
@@ -52,6 +52,7 @@ boost::beast::http::response<boost::beast::http::string_body> password_handler::
   }
 
   bool val = (userPassword == password);
+  BOOST_LOG_TRIVIAL(info) << "PASSWORD: " << password;
   BOOST_LOG_TRIVIAL(info) << "USER PASSWORD: " << userPassword;
   BOOST_LOG_TRIVIAL(info) << val;
 
