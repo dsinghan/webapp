@@ -59,3 +59,7 @@ TEST_F(statusRequestHandlerTest, generate_complicated_report) {
     EXPECT_TRUE(response["Content-Type"] == "text/plain");
     EXPECT_EQ(response.body(), "Report:\n\nRequests Received:\n/, 404: 3\n/echo, 200: 5\n\nRequest Handlers:\nEchoHandler\n\t/echo\n");
 }
+
+TEST_F(statusRequestHandlerTest, handleGetName) {
+    EXPECT_TRUE(han.get_name() == "Status Request Handler");
+}

@@ -35,3 +35,7 @@ TEST_F(echoRequestHandlerTest, handleSimpleRequest) {
     EXPECT_TRUE(response.body() == "GET  HTTP/1.1\r\nUser-Agent: https://www.cs130.org/\r\n");
 
 }
+
+TEST_F(echoRequestHandlerTest, handleGetName) {
+    EXPECT_TRUE(han.get_name() == "Echo Request Handler");
+}

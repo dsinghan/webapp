@@ -181,16 +181,52 @@ target_link_libraries(utils_test
     Boost::log)
 
 add_executable(echo_request_handler_test tests/echo_request_handler_test.cc)
-target_link_libraries(echo_request_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler blocking_request_handler request_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(echo_request_handler_test 
+    config_parser 
+    echo_request_handler 
+    proxy_request_handler 
+    static_request_handler 
+    error_handler 
+    blocking_request_handler 
+    request_handler 
+    gtest_main Boost::log_setup Boost::log)
 
 add_executable(static_request_handler_test tests/static_request_handler_test.cc)
-target_link_libraries(static_request_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler blocking_request_handler request_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(static_request_handler_test 
+    config_parser 
+    echo_request_handler 
+    proxy_request_handler 
+    static_request_handler 
+    error_handler 
+    blocking_request_handler 
+    request_handler 
+    gtest_main 
+    Boost::log_setup Boost::log)
 
 add_executable(error_handler_test tests/error_handler_test.cc)
-target_link_libraries(error_handler_test config_parser echo_request_handler proxy_request_handler static_request_handler error_handler request_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(error_handler_test 
+    config_parser 
+    echo_request_handler 
+    proxy_request_handler 
+    static_request_handler 
+    error_handler 
+    request_handler 
+    gtest_main 
+    Boost::log_setup 
+    Boost::log)
 
 add_executable(proxy_request_handler_test tests/proxy_request_handler_test.cc)
-target_link_libraries(proxy_request_handler_test http_client config_parser echo_request_handler proxy_request_handler static_request_handler error_handler request_handler gtest_main Boost::log_setup Boost::log)
+target_link_libraries(proxy_request_handler_test 
+    http_client 
+    config_parser 
+    echo_request_handler 
+    proxy_request_handler 
+    static_request_handler 
+    error_handler 
+    request_handler 
+    gtest_main 
+    Boost::log_setup 
+    Boost::log)
 
 add_executable(status_request_handler_test tests/status_request_handler_test.cc)
 target_link_libraries(status_request_handler_test
@@ -210,6 +246,12 @@ target_link_libraries(chat_request_handler_test
     config_parser
     gtest_main)
 
+add_executable(blocking_request_handler_test tests/blocking_request_handler_test.cc)
+target_link_libraries(blocking_request_handler_test
+    blocking_request_handler
+    config_parser
+    gtest_main)
+
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -223,6 +265,7 @@ gtest_discover_tests(proxy_request_handler_test WORKING_DIRECTORY ${CMAKE_CURREN
 gtest_discover_tests(status_request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(health_request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(chat_request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(blocking_request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Integration Test
 add_test(
@@ -233,5 +276,10 @@ add_test(
 # Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
 generate_coverage_report(
-    TARGETS webserver session server config_parser request_handler echo_request_handler static_request_handler proxy_request_handler status_request_handler error_handler blocking_request_handler health_request_handler chat_request_handler utils
-    TESTS config_parser_test session_test server_test request_handler_test echo_request_handler_test static_request_handler_test proxy_request_handler_test status_request_handler_test error_handler_test health_request_handler_test chat_request_handler_test utils_test)
+    TARGETS webserver session server config_parser request_handler echo_request_handler 
+        static_request_handler proxy_request_handler status_request_handler error_handler 
+        blocking_request_handler health_request_handler chat_request_handler utils
+    TESTS config_parser_test session_test server_test request_handler_test echo_request_handler_test 
+        static_request_handler_test proxy_request_handler_test status_request_handler_test 
+        error_handler_test health_request_handler_test chat_request_handler_test utils_test 
+        blocking_request_handler_test)
