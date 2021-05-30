@@ -263,7 +263,9 @@ const COLORS = [
 
 const USER_TO_COLOR = {}
 
-const SERVER = "http://34.83.179.31/check_password";
+let domain = window.location.host;
+const SERVER = "http://" + domain + "/check_password";
+
 const RETRIEVE_MESSAGES_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages?maxRecords=1000&view=Grid%20view&sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc"
 //const SERVER = "http://localhost:8080/check_password";
 const CREATE_MESSAGE_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages";

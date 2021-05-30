@@ -251,6 +251,12 @@ target_link_libraries(blocking_request_handler_test
     blocking_request_handler
     config_parser
     gtest_main)
+    
+add_executable(password_handler_test tests/password_handler_test.cc)
+target_link_libraries(password_handler_test
+    password_handler
+    config_parser
+    gtest_main)
 
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -266,6 +272,8 @@ gtest_discover_tests(status_request_handler_test WORKING_DIRECTORY ${CMAKE_CURRE
 gtest_discover_tests(health_request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(chat_request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(blocking_request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(password_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
 
 # Integration Test
 add_test(
@@ -278,8 +286,8 @@ include(cmake/CodeCoverageReportConfig.cmake)
 generate_coverage_report(
     TARGETS webserver session server config_parser request_handler echo_request_handler 
         static_request_handler proxy_request_handler status_request_handler error_handler 
-        blocking_request_handler health_request_handler chat_request_handler utils
+        blocking_request_handler password_handler health_request_handler chat_request_handler utils
     TESTS config_parser_test session_test server_test request_handler_test echo_request_handler_test 
         static_request_handler_test proxy_request_handler_test status_request_handler_test 
         error_handler_test health_request_handler_test chat_request_handler_test utils_test 
-        blocking_request_handler_test)
+        blocking_request_handler_test password_handler_test)

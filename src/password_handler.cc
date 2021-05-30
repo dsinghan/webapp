@@ -18,8 +18,8 @@ password_handler::password_handler(std::string handler_location, const NginxConf
 
     std::string path = "/password.txt";
     
+    // File that contains the password to our chat room
     std::string full_path = base_path_ + path;
-    BOOST_LOG_TRIVIAL(info) << "PATH: " << full_path;
     BOOST_LOG_TRIVIAL(info) << "Searching for file: " << full_path;
     std::ifstream inFile;
     inFile.open(full_path.c_str());
@@ -44,17 +44,14 @@ boost::beast::http::response<boost::beast::http::string_body> password_handler::
   std::string userPassword = "";
 
   for(auto const& field : request) {
-    std::cout << std::string(to_string(field.name())) << " = " << field.value() << "\n";
     if ( std::string(to_string(field.name())) == "Security-Scheme") {
       userPassword = field.value().to_string();
       break;
     }
   }
 
+  // Checks if user password is equal to actual password
   bool val = (userPassword == password);
-  BOOST_LOG_TRIVIAL(info) << "PASSWORD: " << password;
-  BOOST_LOG_TRIVIAL(info) << "USER PASSWORD: " << userPassword;
-  BOOST_LOG_TRIVIAL(info) << val;
 
   boost::beast::http::response<boost::beast::http::string_body> response;
 

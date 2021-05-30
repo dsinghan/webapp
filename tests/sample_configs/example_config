@@ -44,3 +44,7 @@ location "/sleep" BlockingHandler {
 location "/chat" ChatHandler {
   root "../static/chat";
 }
+
+location "/check_password" PasswordHandler {
+  root "../chat_password";
+}
