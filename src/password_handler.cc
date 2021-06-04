@@ -10,14 +10,14 @@
 #include "password_handler.h"
 
 password_handler::password_handler(std::string handler_location, const NginxConfig & handler_config)
-  : request_handler(handler_location, handler_config) 
+  : request_handler(handler_location, handler_config)
   {
 
     NginxConfigStatement * path_config_statement = NginxConfigParser::find_statement("root", &handler_config);
     base_path_ = NginxConfigParser::parse_string(path_config_statement->tokens_[1]);
 
     std::string path = "/password.txt";
-    
+
     // File that contains the password to our chat room
     std::string full_path = base_path_ + path;
     BOOST_LOG_TRIVIAL(info) << "Searching for file: " << full_path;

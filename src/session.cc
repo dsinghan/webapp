@@ -125,7 +125,6 @@ int session::handle_read(const boost::system::error_code& error,
     BOOST_LOG_TRIVIAL(debug) << "Handling request with path: " << path;
     response_ = selected_request_handler->handle_request(request_);
 
-    // TODO: Is this the correct path?
     std::string url = std::string(request_.target());
     request_results_lock_.lock();
     (*request_results_)[std::make_pair(url, response_.result_int())]++;
@@ -144,7 +143,6 @@ int session::handle_read(const boost::system::error_code& error,
 
 int session::handle_write(const boost::system::error_code& error)
 {
-    
     if (!error)
     {
         async_read();

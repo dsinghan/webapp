@@ -16,7 +16,7 @@ proxy_request_handler::proxy_request_handler(
         NginxConfigParser::find_statement("host", &handler_config);
     host_name_ =
         NginxConfigParser::parse_string(host_config_statement->tokens_[1]);
-    
+
     NginxConfigStatement * port_config_statement =
         NginxConfigParser::find_statement("port", &handler_config);
     host_port_ = NginxConfigParser::parse_string(port_config_statement->tokens_[1]);
@@ -86,10 +86,10 @@ bool proxy_request_handler::get_new_request(
 
     //remove the http:// part of the request if it exists
     if (location.find("://") != std::string::npos) {
-	protocol = location.substr(0, location.find("://"));
-	location.erase(0, location.find("://") + 3);
+    protocol = location.substr(0, location.find("://"));
+    location.erase(0, location.find("://") + 3);
     }
-    
+
     //split host to location before '/' if one exists
     if (location.find("/") == std::string::npos) {
         new_host = location;
@@ -115,7 +115,7 @@ std::string proxy_request_handler::form_URI(const http::request<http::string_bod
     if (prefix_pos == std::string::npos) return "/";
     URI_to_req.erase(0, handler_location_.length());
     if (URI_to_req.length() == 0) return "/";
-    
+
     return URI_to_req;
 }
 

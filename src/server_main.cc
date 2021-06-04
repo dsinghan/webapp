@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
         config_parser.find_statement("threads", &config);
     int num_threads =
         stoi(config_parser.parse_string(num_threads_config_statement->tokens_[1]));
-    
+
     // Create threads
     std::vector<boost::shared_ptr<boost::thread>> threads;
     for (std::size_t i = 0; i < num_threads; ++i) {
