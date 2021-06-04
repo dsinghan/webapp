@@ -266,9 +266,8 @@ const USER_TO_COLOR = {}
 let domain = window.location.host;
 const SERVER = "http://" + domain + "/check_password";
 
-const RETRIEVE_MESSAGES_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages?maxRecords=1000&view=Grid%20view&sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc"
-//const SERVER = "http://localhost:8080/check_password";
-const CREATE_MESSAGE_URL="https://api.airtable.com/v0/app9ucw8JUrbxhl2k/Messages";
+let RETRIEVE_MESSAGES_URL="";
+let CREATE_MESSAGE_URL="";
 
 const getMessagesReq = {
   lastSent: null,
@@ -287,10 +286,13 @@ async function submitCredentials() {
   credentials["username"] = _username;
   credentials["password"] = _password;
   isCorrect = await checkPassword(_password);
-  
+
   //If the password is incorrect, return with an alert.
   if (isCorrect == "False") {
     return alert("Incorrect Password");
+  } else {
+    RETRIEVE_MESSAGES_URL=isCorrect + "?maxRecords=1000&view=Grid%20view&sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc";
+    CREATE_MESSAGE_URL=isCorrect;
   }
 
 

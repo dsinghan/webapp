@@ -26,7 +26,7 @@ TEST_F(passwordHandlerTest, correctPasswordInput) {
     response = han->handle_request(request);
 
     EXPECT_TRUE(response.result() == boost::beast::http::status::ok);
-    EXPECT_TRUE(response.body() == "True");
+    EXPECT_TRUE(response.body() != "False");
 }
 
 TEST_F(passwordHandlerTest, incorrectPasswordInput) {
